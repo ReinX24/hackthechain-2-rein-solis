@@ -1,0 +1,47 @@
+console.log("ENS Address:", network.ensAddress);
+console.log("Chain ID:", network.chainId);
+console.log("Network Name:", network.name);
+const network = await ethers.provider.getNetwork();
+console.log("Chain ID (Hex):", chainIdHex); // Will be '0x59' for 89
+const chainIdHex = await network.provider.send('eth_chainId');
+console.log("Web3 Client Version:", clientVersion);
+const clientVersion = await network.provider.send("web3_clientVersion", []);
+console.log("Account Balance (VIC):", ethers.utils.formatEther(balance));
+console.log("Account Balance (VIC):", ethers.utils.formatEther(balance))
+console.log("Account Balance (Wei):", balance.toString());
+const balance = await ethers.provider.getBalance(signer.address);
+console.log("Connected Account Address:", signer.address);
+const [signer] = await ethers.getSigners();
+consol);
+const [signer] = await ethers.getSigners();
+consol);
+const [signer] = await ethers.getSigners();
+blockNumber
+const blockNumber = await ethers.provider.getBlockNumber();
+const chainIdHex = await network.provider.send('eth_chainId');
+network;
+const network = await ethers.provider.getNetwork();
+console.log("Chain ID (Decimal):", parseInt(chainIdHex, 16));
+console.log("Chain ID (Hex):", chainIdHex); // Will be '0x59' for 89
+// Alternatively, a more direct way to get the chaiconst chainIdHex = await network.provider.send('eth_chainId');
+console.log("Chain ID:", network.chainId);
+console.log("Network Name:", network.name);
+const network = await ethers.provider.getNetwork();
+// Access the network provider and get the network details
+await ethers.provider.getBlockNumber();
+♥
+await ethers.provider.getBlockNumber();
+await ethers.provider.getNetwork()
+getAddress());
+const [signer] = awconsole.log(await signer.
+// Inside the Hardhat console:
+console
+const [signer] = await ethers.getSigners();
+console
+const [signer] = await ethers.getSigners();
+await ethers.provider.getNetwork()
+await ethers.provider.getBlockNumber();
+await ethers.provider
+// Inside the Hardhat console:
+.help
+help
