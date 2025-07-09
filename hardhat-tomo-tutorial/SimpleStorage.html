@@ -1,0 +1,639 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>SimpleStorage DApp</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Ethers.js CDN - Changed to unpkg for robustness -->
+  <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 600px;
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      /* text-xl */
+      margin-bottom: 16px;
+      color: #374151;
+      /* gray-700 */
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.875rem;
+      /* text-sm */
+      font-weight: 500;
+      color: #4b5563;
+      /* gray-700 */
+      margin-bottom: 8px;
+    }
+
+    .input-group input[type="number"],
+    .input-group input[type="text"] {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      /* gray-300 */
+      border-radius: 8px;
+      font-size: 1rem;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .input-group input[type="number"]:focus,
+    .input-group input[type="text"]:focus {
+      border-color: #6366f1;
+      /* indigo-500 */
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      /* ring-indigo-200 */
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      /* text-sm */
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.15s ease-in-out;
+      cursor: pointer;
+      border: none;
+      outline: none;
+    }
+
+    .btn-primary {
+      background-color: #6366f1;
+      /* indigo-600 */
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: #4f46e5;
+      /* indigo-700 */
+    }
+
+    .btn-secondary {
+      background-color: #e5e7eb;
+      /* gray-200 */
+      color: #374151;
+      /* gray-700 */
+      border: 1px solid #d1d5db;
+      /* gray-300 */
+    }
+
+    .btn-secondary:hover {
+      background-color: #d1d5db;
+      /* gray-300 */
+    }
+
+    .btn-green {
+      background-color: #10b981;
+      /* green-600 */
+      color: #ffffff;
+    }
+
+    .btn-green:hover {
+      background-color: #059669;
+      /* green-700 */
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .result-box {
+      background-color: #f9fafb;
+      /* gray-50 */
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px dashed #e5e7eb;
+      /* gray-200 */
+      color: #4b5563;
+      /* gray-700 */
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-top: 16px;
+    }
+
+    .error-message {
+      color: #ef4444;
+      /* red-500 */
+      margin-top: 8px;
+      font-size: 0.875rem;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #ffffff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">SimpleStorage DApp</h1>
+
+    <div class="mb-8">
+      <h2 class="section-title">Wallet Connection</h2>
+      <p id="walletStatus" class="text-sm text-gray-600 mb-4">Not connected.</p>
+      <button id="connectWalletBtn" class="btn btn-primary">Connect MetaMask</button>
+      <p id="accountAddress" class="text-sm text-gray-800 mt-2 break-words"></p>
+      <p id="networkInfo" class="text-sm text-gray-800 break-words"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Retrieve Favorite Number</h2>
+      <button id="retrieveBtn" class="btn btn-primary w-full">Retrieve Number</button>
+      <div id="retrieveResult" class="result-box"></div>
+      <p id="retrieveError" class="error-message"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Store Favorite Number</h2>
+      <div class="input-group">
+        <label for="storeNumber">Number to Store:</label>
+        <input type="number" id="storeNumber" placeholder="e.g., 42" class="rounded-md">
+      </div>
+      <button id="storeBtn" class="btn btn-green w-full">Store Number</button>
+      <div id="storeResult" class="result-box"></div>
+      <p id="storeError" class="error-message"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Add Person</h2>
+      <div class="input-group">
+        <label for="personName">Name:</label>
+        <input type="text" id="personName" placeholder="e.g., Bob" class="rounded-md">
+      </div>
+      <div class="input-group">
+        <label for="personFavoriteNumber">Favorite Number:</label>
+        <input type="number" id="personFavoriteNumber" placeholder="e.g., 101" class="rounded-md">
+      </div>
+      <button id="addPersonBtn" class="btn btn-green w-full">Add Person</button>
+      <div id="addPersonResult" class="result-box"></div>
+      <p id="addPersonError" class="error-message"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Get Favorite Number by Name (Mapping)</h2>
+      <div class="input-group">
+        <label for="searchName">Name to Search:</label>
+        <input type="text" id="searchName" placeholder="e.g., Alice" class="rounded-md">
+      </div>
+      <button id="searchNameBtn" class="btn btn-primary w-full">Search</button>
+      <div id="searchNameResult" class="result-box"></div>
+      <p id="searchNameError" class="error-message"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Get Person from List (Array)</h2>
+      <div class="input-group">
+        <label for="personIndex">Index (0-based):</label>
+        <input type="number" id="personIndex" value="0" min="0" class="rounded-md">
+      </div>
+      <button id="getPersonBtn" class="btn btn-primary w-full">Get Person</button>
+      <div id="getPersonResult" class="result-box"></div>
+      <p id="getPersonError" class="error-message"></p>
+    </div>
+  </div>
+
+  <script>
+    // --- Contract Configuration ---
+    const CONTRACT_ADDRESS = "0x2888391eeBa4B39F051D4Fa0A375b8fE04dE0Fa6"; // <<< PASTE YOUR DEPLOYED CONTRACT ADDRESS HERE
+    const CONTRACT_ABI = [ // <<< PASTE YOUR CONTRACT ABI HERE (from SimpleStorage.json)
+      {
+        "inputs": [],
+        "name": "listOfPeople",
+        "outputs": [
+          {
+            "components": [
+              {
+                "internalType": "uint256",
+                "name": "favoriteNumber",
+                "type": "uint256"
+              },
+              {
+                "internalType": "string",
+                "name": "name",
+                "type": "string"
+              }
+            ],
+            "internalType": "struct SimpleStorage.Person[]",
+            "name": "",
+            "type": "tuple[]"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "",
+            "type": "string"
+          }
+        ],
+        "name": "nameToFavoriteNumber",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "myFavoriteNumber",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "string",
+            "name": "_name",
+            "type": "string"
+          },
+          {
+            "internalType": "uint256",
+            "name": "_favoriteNumber",
+            "type": "uint256"
+          }
+        ],
+        "name": "addPerson",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [],
+        "name": "retrieve",
+        "outputs": [
+          {
+            "internalType": "uint256",
+            "name": "",
+            "type": "uint256"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "uint256",
+            "name": "_favoriteNumber",
+            "type": "uint256"
+          }
+        ],
+        "name": "store",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+    const VICTION_TESTNET_CHAIN_ID = 89; // Chain ID for Viction Testnet
+
+    // --- Global Ethers.js variables ---
+    let provider;
+    let signer;
+    let simpleStorageContract;
+    let currentAccount = null;
+
+    // --- DOM Elements ---
+    const walletStatus = document.getElementById('walletStatus');
+    const connectWalletBtn = document.getElementById('connectWalletBtn');
+    const accountAddress = document.getElementById('accountAddress');
+    const networkInfo = document.getElementById('networkInfo');
+
+    const retrieveBtn = document.getElementById('retrieveBtn');
+    const retrieveResult = document.getElementById('retrieveResult');
+    const retrieveError = document.getElementById('retrieveError');
+
+    const storeNumberInput = document.getElementById('storeNumber');
+    const storeBtn = document.getElementById('storeBtn');
+    const storeResult = document.getElementById('storeResult');
+    const storeError = document.getElementById('storeError');
+
+    const personNameInput = document.getElementById('personName');
+    const personFavoriteNumberInput = document.getElementById('personFavoriteNumber');
+    const addPersonBtn = document.getElementById('addPersonBtn');
+    const addPersonResult = document.getElementById('addPersonResult');
+    const addPersonError = document.getElementById('addPersonError');
+
+    const searchNameInput = document.getElementById('searchName');
+    const searchNameBtn = document.getElementById('searchNameBtn');
+    const searchNameResult = document.getElementById('searchNameResult');
+    const searchNameError = document.getElementById('searchNameError');
+
+    const personIndexInput = document.getElementById('personIndex');
+    const getPersonBtn = document.getElementById('getPersonBtn');
+    const getPersonResult = document.getElementById('getPersonResult');
+    const getPersonError = document.getElementById('getPersonError');
+
+
+    // --- Utility Functions ---
+    function clearMessages() {
+      retrieveError.textContent = '';
+      storeError.textContent = '';
+      addPersonError.textContent = '';
+      searchNameError.textContent = '';
+      getPersonError.textContent = '';
+    }
+
+    function showLoading(buttonElement) {
+      buttonElement.disabled = true;
+      buttonElement.innerHTML = `<span class="loading-spinner"></span> Loading...`;
+    }
+
+    function hideLoading(buttonElement, originalText) {
+      buttonElement.disabled = false;
+      buttonElement.innerHTML = originalText;
+    }
+
+    // --- Wallet Connection ---
+    async function connectWallet() {
+      clearMessages();
+      // Check if ethers is defined before proceeding
+      if (typeof ethers === 'undefined' || typeof window.ethereum === 'undefined') {
+        walletStatus.textContent = 'MetaMask or Ethers.js is not loaded. Please ensure your browser supports Web3 and try again.';
+        walletStatus.classList.add('error-message');
+        connectWalletBtn.disabled = true;
+        return;
+      }
+
+      try {
+        showLoading(connectWalletBtn);
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        currentAccount = accounts[0];
+        accountAddress.textContent = `Connected Account: ${currentAccount}`;
+
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        simpleStorageContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        const network = await provider.getNetwork();
+        if (network.chainId !== VICTION_TESTNET_CHAIN_ID) {
+          walletStatus.textContent = `Connected to incorrect network (Chain ID: ${network.chainId}). Please switch to Viction Testnet (Chain ID: ${VICTION_TESTNET_CHAIN_ID}).`;
+          walletStatus.classList.add('error-message');
+          simpleStorageContract = null; // Disable contract interaction
+        } else {
+          walletStatus.textContent = 'Connected to Viction Testnet!';
+          walletStatus.classList.remove('error-message');
+          walletStatus.classList.add('text-green-600');
+          networkInfo.textContent = `Network: ${network.name} (Chain ID: ${network.chainId})`;
+        }
+
+        // Listen for account changes
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on('chainChanged', handleChainChanged);
+
+      } catch (error) {
+        console.error("Error connecting wallet:", error);
+        walletStatus.textContent = `Wallet connection failed: ${error.message}`;
+        walletStatus.classList.add('error-message');
+      } finally {
+        hideLoading(connectWalletBtn, 'Connect MetaMask');
+      }
+    }
+
+    function handleAccountsChanged(accounts) {
+      if (accounts.length === 0) {
+        walletStatus.textContent = 'Disconnected from MetaMask.';
+        accountAddress.textContent = '';
+        networkInfo.textContent = '';
+        currentAccount = null;
+        simpleStorageContract = null;
+      } else if (accounts[0] !== currentAccount) {
+        currentAccount = accounts[0];
+        accountAddress.textContent = `Connected Account: ${currentAccount}`;
+        // Re-initialize contract with new signer if needed
+        if (provider) {
+          signer = provider.getSigner();
+          simpleStorageContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        }
+        walletStatus.textContent = 'Account changed. Reconnected.';
+        walletStatus.classList.remove('error-message');
+        walletStatus.classList.add('text-green-600');
+      }
+    }
+
+    function handleChainChanged(chainId) {
+      window.location.reload(); // Recommended to reload on chain changes
+    }
+
+    // --- Contract Interaction Functions ---
+
+    async function retrieveFavoriteNumber() {
+      clearMessages();
+      if (!simpleStorageContract) {
+        retrieveError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+      try {
+        showLoading(retrieveBtn);
+        const number = await simpleStorageContract.retrieve();
+        retrieveResult.textContent = `Favorite Number: ${number.toString()}`;
+      } catch (error) {
+        console.error("Error retrieving number:", error);
+        retrieveError.textContent = `Error: ${error.message}`;
+      } finally {
+        hideLoading(retrieveBtn, 'Retrieve Number');
+      }
+    }
+
+    async function storeFavoriteNumber() {
+      clearMessages();
+      if (!simpleStorageContract) {
+        storeError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+      const numberToStore = storeNumberInput.value;
+      if (numberToStore === "") {
+        storeError.textContent = 'Please enter a number to store.';
+        return;
+      }
+      try {
+        showLoading(storeBtn);
+        const tx = await simpleStorageContract.store(numberToStore);
+        storeResult.textContent = `Transaction sent: ${tx.hash}\nWaiting for confirmation...`;
+        await tx.wait(); // Wait for the transaction to be mined
+        storeResult.textContent = `Transaction confirmed! Number ${numberToStore} stored.`;
+        // Optionally, update the retrieve result after storing
+        retrieveFavoriteNumber();
+      } catch (error) {
+        console.error("Error storing number:", error);
+        storeError.textContent = `Error: ${error.message}`;
+      } finally {
+        hideLoading(storeBtn, 'Store Number');
+      }
+    }
+
+    async function addPerson() {
+      clearMessages();
+      if (!simpleStorageContract) {
+        addPersonError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+      const name = personNameInput.value;
+      const favNumber = personFavoriteNumberInput.value;
+
+      if (name === "" || favNumber === "") {
+        addPersonError.textContent = 'Please enter both name and favorite number.';
+        return;
+      }
+
+      try {
+        showLoading(addPersonBtn);
+        const tx = await simpleStorageContract.addPerson(name, favNumber);
+        addPersonResult.textContent = `Transaction sent: ${tx.hash}\nWaiting for confirmation...`;
+        await tx.wait();
+        addPersonResult.textContent = `Person '${name}' added with favorite number ${favNumber}.`;
+      } catch (error) {
+        console.error("Error adding person:", error);
+        addPersonError.textContent = `Error: ${error.message}`;
+      } finally {
+        hideLoading(addPersonBtn, 'Add Person');
+      }
+    }
+
+    async function searchName() {
+      clearMessages();
+      if (!simpleStorageContract) {
+        searchNameError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+      const nameToSearch = searchNameInput.value;
+      if (nameToSearch === "") {
+        searchNameError.textContent = 'Please enter a name to search.';
+        return;
+      }
+      try {
+        showLoading(searchNameBtn);
+        const number = await simpleStorageContract.nameToFavoriteNumber(nameToSearch);
+        searchNameResult.textContent = `Favorite Number for '${nameToSearch}': ${number.toString()}`;
+      } catch (error) {
+        console.error("Error searching name:", error);
+        searchNameError.textContent = `Error: ${error.message}`;
+      } finally {
+        hideLoading(searchNameBtn, 'Search');
+      }
+    }
+
+    async function getPersonFromList() {
+      clearMessages();
+      if (!simpleStorageContract) {
+        getPersonError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+      const index = parseInt(personIndexInput.value);
+      if (isNaN(index) || index < 0) {
+        getPersonError.textContent = 'Please enter a valid non-negative index.';
+        return;
+      }
+      try {
+        showLoading(getPersonBtn);
+        // Public arrays generate a getter that takes an index
+        const person = await simpleStorageContract.listOfPeople(index);
+        getPersonResult.textContent = `Person at index ${index}:\nName: ${person.name}\nFavorite Number: ${person.favoriteNumber.toString()}`;
+      } catch (error) {
+        console.error("Error getting person from list:", error);
+        getPersonError.textContent = `Error: ${error.message || 'Index out of bounds or other error.'}`;
+      } finally {
+        hideLoading(getPersonBtn, 'Get Person');
+      }
+    }
+
+
+    // --- Event Listeners ---
+    connectWalletBtn.addEventListener('click', connectWallet);
+    retrieveBtn.addEventListener('click', retrieveFavoriteNumber);
+    storeBtn.addEventListener('click', storeFavoriteNumber);
+    addPersonBtn.addEventListener('click', addPerson);
+    searchNameBtn.addEventListener('click', searchName);
+    getPersonBtn.addEventListener('click', getPersonFromList);
+
+    // Initial check for MetaMask connection on page load
+    window.addEventListener('load', () => {
+      // Add a check to ensure ethers is defined before trying to use it
+      if (typeof ethers === 'undefined') {
+        walletStatus.textContent = 'Ethers.js is not loaded. Please check your internet connection or CDN link.';
+        walletStatus.classList.add('error-message');
+        connectWalletBtn.disabled = true;
+        return; // Exit if ethers is not available
+      }
+
+      if (typeof window.ethereum !== 'undefined') {
+        connectWalletBtn.textContent = 'Connect MetaMask';
+        window.ethereum.request({ method: 'eth_accounts' })
+          .then(handleAccountsChanged)
+          .catch((err) => console.error(err));
+      } else {
+        walletStatus.textContent = 'MetaMask is not installed.';
+        walletStatus.classList.add('error-message');
+        connectWalletBtn.disabled = true;
+      }
+    });
+
+  </script>
+</body>
+
+</html>

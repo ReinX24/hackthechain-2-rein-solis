@@ -1,0 +1,34 @@
+{
+  "compilerOptions": {
+    "target": "es2020",
+    "module": "NodeNext", // This is crucial for the error you're seeing
+    "moduleResolution": "NodeNext", // This is crucial for the error you're seeing
+    "esModuleInterop": true,
+    "forceConsistentCasingInFileNames": true,
+    "strict": true,
+    "skipLibCheck": true,
+    "resolveJsonModule": true,
+    "outDir": "./dist", // Output directory for compiled JavaScript files
+    "typeRoots": [
+      // Where to look for type definitions
+      "./node_modules/@types",
+      "./typechain-types" // For TypeChain generated types
+    ]
+  },
+  "include": [
+    "./scripts",
+    "./test",
+    "./hardhat.config.ts",
+    "./typechain-types" // Include TypeChain generated types
+  ],
+  "files": [
+    // These are often added by Hardhat plugins for type extensions
+    "./node_modules/@nomicfoundation/hardhat-ethers/type-extensions.d.ts",
+    "./node_modules/@nomicfoundation/hardhat-chai-matchers/type-extensions.d.ts",
+    "./node_modules/@nomicfoundation/hardhat-network-helpers/type-extensions.d.ts",
+    "./node_modules/@nomicfoundation/hardhat-verify/type-extensions.d.ts",
+    "./node_modules/@typechain/hardhat/type-extensions.d.ts",
+    "./node_modules/hardhat-gas-reporter/type-extensions.d.ts",
+    "./node_modules/solidity-coverage/type-extensions.d.ts"
+  ]
+}

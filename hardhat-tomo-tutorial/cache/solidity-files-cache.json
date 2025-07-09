@@ -1,14 +1,13 @@
 {
   "_format": "hh-sol-cache-2",
   "files": {
-    "E:\\repos\\hackthechain-2-rein-solis\\viction-hardhat-project\\contracts\\Lock.sol": {
-      "lastModificationDate": 1752072449268,
-      "contentHash": "642fa52ab63153524e2438211810ea7e",
+    "E:\\repos\\hackthechain-2-rein-solis\\hardhat-tomo-tutorial\\contracts\\Lock.sol": {
+      "lastModificationDate": 1752074455754,
+      "contentHash": "1355eb252875a88cbda4218ba4c2a268",
       "sourceName": "contracts/Lock.sol",
       "solcConfig": {
-        "version": "0.8.28",
+        "version": "0.8.17",
         "settings": {
-          "evmVersion": "paris",
           "optimizer": {
             "enabled": false,
             "runs": 200
@@ -31,20 +30,19 @@
       },
       "imports": [],
       "versionPragmas": [
-        "^0.8.28"
+        "^0.8.17"
       ],
       "artifacts": [
         "Lock"
       ]
     },
-    "E:\\repos\\hackthechain-2-rein-solis\\viction-hardhat-project\\contracts\\MyToken.sol": {
-      "lastModificationDate": 1752073158495,
-      "contentHash": "d7e0a08967345d06337113888aa92b77",
+    "E:\\repos\\hackthechain-2-rein-solis\\hardhat-tomo-tutorial\\contracts\\MyToken.sol": {
+      "lastModificationDate": 1752075422333,
+      "contentHash": "764e39d946003693f418811d141fe35d",
       "sourceName": "contracts/MyToken.sol",
       "solcConfig": {
-        "version": "0.8.28",
+        "version": "0.8.17",
         "settings": {
-          "evmVersion": "paris",
           "optimizer": {
             "enabled": false,
             "runs": 200
@@ -69,20 +67,19 @@
         "@openzeppelin/contracts/token/ERC20/ERC20.sol"
       ],
       "versionPragmas": [
-        "^0.8.28"
+        "^0.8.17"
       ],
       "artifacts": [
         "MyToken"
       ]
     },
-    "E:\\repos\\hackthechain-2-rein-solis\\viction-hardhat-project\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol": {
-      "lastModificationDate": 1752073128529,
-      "contentHash": "57d79df281f57bbb1b09214c7914f877",
+    "E:\\repos\\hackthechain-2-rein-solis\\hardhat-tomo-tutorial\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\ERC20.sol": {
+      "lastModificationDate": 1752074208849,
+      "contentHash": "3ae5166c6827a9cf1a7a462d1632b464",
       "sourceName": "@openzeppelin/contracts/token/ERC20/ERC20.sol",
       "solcConfig": {
-        "version": "0.8.28",
+        "version": "0.8.17",
         "settings": {
-          "evmVersion": "paris",
           "optimizer": {
             "enabled": false,
             "runs": 200
@@ -106,172 +103,22 @@
       "imports": [
         "./IERC20.sol",
         "./extensions/IERC20Metadata.sol",
-        "../../utils/Context.sol",
-        "../../interfaces/draft-IERC6093.sol"
+        "../../utils/Context.sol"
       ],
       "versionPragmas": [
-        "^0.8.20"
+        "^0.8.0"
       ],
       "artifacts": [
         "ERC20"
       ]
     },
-    "E:\\repos\\hackthechain-2-rein-solis\\viction-hardhat-project\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
-      "lastModificationDate": 1752073128503,
-      "contentHash": "67bfbc07588eb8683b3fd8f6f909563e",
+    "E:\\repos\\hackthechain-2-rein-solis\\hardhat-tomo-tutorial\\node_modules\\@openzeppelin\\contracts\\utils\\Context.sol": {
+      "lastModificationDate": 1752074208827,
+      "contentHash": "5f2c5c4b6af2dd4551027144797bc8be",
       "sourceName": "@openzeppelin/contracts/utils/Context.sol",
       "solcConfig": {
-        "version": "0.8.28",
+        "version": "0.8.17",
         "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "Context"
-      ]
-    },
-    "E:\\repos\\hackthechain-2-rein-solis\\viction-hardhat-project\\node_modules\\@openzeppelin\\contracts\\interfaces\\draft-IERC6093.sol": {
-      "lastModificationDate": 1752073128513,
-      "contentHash": "267d92fe4de67b1bdb3302c08f387dbf",
-      "sourceName": "@openzeppelin/contracts/interfaces/draft-IERC6093.sol",
-      "solcConfig": {
-        "version": "0.8.28",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC1155Errors",
-        "IERC20Errors",
-        "IERC721Errors"
-      ]
-    },
-    "E:\\repos\\hackthechain-2-rein-solis\\viction-hardhat-project\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\IERC20.sol": {
-      "lastModificationDate": 1752073128573,
-      "contentHash": "8f19f64d2adadf448840908bbaf431c8",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
-      "solcConfig": {
-        "version": "0.8.28",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC20"
-      ]
-    },
-    "E:\\repos\\hackthechain-2-rein-solis\\viction-hardhat-project\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\extensions\\IERC20Metadata.sol": {
-      "lastModificationDate": 1752073128574,
-      "contentHash": "794db3115001aa372c79326fcfd44b1f",
-      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
-      "solcConfig": {
-        "version": "0.8.28",
-        "settings": {
-          "evmVersion": "paris",
-          "optimizer": {
-            "enabled": false,
-            "runs": 200
-          },
-          "outputSelection": {
-            "*": {
-              "*": [
-                "abi",
-                "evm.bytecode",
-                "evm.deployedBytecode",
-                "evm.methodIdentifiers",
-                "metadata"
-              ],
-              "": [
-                "ast"
-              ]
-            }
-          }
-        }
-      },
-      "imports": [
-        "../IERC20.sol"
-      ],
-      "versionPragmas": [
-        "^0.8.20"
-      ],
-      "artifacts": [
-        "IERC20Metadata"
-      ]
-    },
-    "E:\\repos\\hackthechain-2-rein-solis\\viction-hardhat-project\\contracts\\Token.sol": {
-      "lastModificationDate": 1752072928418,
-      "contentHash": "092348e7426e9f3fb6240e33e6e0f152",
-      "sourceName": "contracts/Token.sol",
-      "solcConfig": {
-        "version": "0.8.28",
-        "settings": {
-          "evmVersion": "paris",
           "optimizer": {
             "enabled": false,
             "runs": 200
@@ -297,7 +144,149 @@
         "^0.8.0"
       ],
       "artifacts": [
-        "Token"
+        "Context"
+      ]
+    },
+    "E:\\repos\\hackthechain-2-rein-solis\\hardhat-tomo-tutorial\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\IERC20.sol": {
+      "lastModificationDate": 1752074208890,
+      "contentHash": "df36f7051335cd1e748b1b6463b7fdd3",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/IERC20.sol",
+      "solcConfig": {
+        "version": "0.8.17",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20"
+      ]
+    },
+    "E:\\repos\\hackthechain-2-rein-solis\\hardhat-tomo-tutorial\\node_modules\\@openzeppelin\\contracts\\token\\ERC20\\extensions\\IERC20Metadata.sol": {
+      "lastModificationDate": 1752074208891,
+      "contentHash": "909ab67fc5c25033fe6cd364f8c056f9",
+      "sourceName": "@openzeppelin/contracts/token/ERC20/extensions/IERC20Metadata.sol",
+      "solcConfig": {
+        "version": "0.8.17",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [
+        "../IERC20.sol"
+      ],
+      "versionPragmas": [
+        "^0.8.0"
+      ],
+      "artifacts": [
+        "IERC20Metadata"
+      ]
+    },
+    "E:\\repos\\hackthechain-2-rein-solis\\hardhat-tomo-tutorial\\contracts\\SimpleStorage.sol": {
+      "lastModificationDate": 1752075593499,
+      "contentHash": "dbc2bf4da311bb7acf463563e331b8fe",
+      "sourceName": "contracts/SimpleStorage.sol",
+      "solcConfig": {
+        "version": "0.8.17",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.17"
+      ],
+      "artifacts": [
+        "SimpleStorage"
+      ]
+    },
+    "E:\\repos\\hackthechain-2-rein-solis\\hardhat-tomo-tutorial\\contracts\\VeriDoc.sol": {
+      "lastModificationDate": 1752079366728,
+      "contentHash": "75f25c4696e64d5e94ed3415308c6704",
+      "sourceName": "contracts/VeriDoc.sol",
+      "solcConfig": {
+        "version": "0.8.17",
+        "settings": {
+          "optimizer": {
+            "enabled": false,
+            "runs": 200
+          },
+          "outputSelection": {
+            "*": {
+              "*": [
+                "abi",
+                "evm.bytecode",
+                "evm.deployedBytecode",
+                "evm.methodIdentifiers",
+                "metadata"
+              ],
+              "": [
+                "ast"
+              ]
+            }
+          }
+        }
+      },
+      "imports": [],
+      "versionPragmas": [
+        "^0.8.17"
+      ],
+      "artifacts": [
+        "VeriDoc"
       ]
     }
   }

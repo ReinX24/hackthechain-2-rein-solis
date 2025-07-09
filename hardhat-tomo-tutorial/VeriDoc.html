@@ -1,0 +1,897 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>VeriDoc DApp</title>
+  <!-- Tailwind CSS CDN -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <!-- Ethers.js CDN -->
+  <script src="https://unpkg.com/ethers@5.7.2/dist/ethers.umd.min.js"></script>
+  <style>
+    body {
+      font-family: "Inter", sans-serif;
+      background-color: #f0f4f8;
+      display: flex;
+      justify-content: center;
+      align-items: flex-start;
+      min-height: 100vh;
+      padding: 20px;
+      box-sizing: border-box;
+    }
+
+    .container {
+      background-color: #ffffff;
+      padding: 32px;
+      border-radius: 12px;
+      box-shadow: 0 10px 15px -3px rgba(0, 0, 0, 0.1), 0 4px 6px -2px rgba(0, 0, 0, 0.05);
+      width: 100%;
+      max-width: 700px;
+      /* Slightly wider for more content */
+    }
+
+    .section-title {
+      font-weight: 600;
+      font-size: 1.25rem;
+      /* text-xl */
+      margin-bottom: 16px;
+      color: #374151;
+      /* gray-700 */
+    }
+
+    .input-group {
+      margin-bottom: 16px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 0.875rem;
+      /* text-sm */
+      font-weight: 500;
+      color: #4b5563;
+      /* gray-700 */
+      margin-bottom: 8px;
+    }
+
+    .input-group input[type="text"],
+    .input-group input[type="file"],
+    /* Added file input styling */
+    .input-group textarea {
+      width: 100%;
+      padding: 10px 12px;
+      border: 1px solid #d1d5db;
+      /* gray-300 */
+      border-radius: 8px;
+      font-size: 1rem;
+      box-shadow: inset 0 1px 2px rgba(0, 0, 0, 0.05);
+      transition: border-color 0.15s ease-in-out, box-shadow 0.15s ease-in-out;
+    }
+
+    .input-group input[type="text"]:focus,
+    .input-group input[type="file"]:focus,
+    /* Added file input styling */
+    .input-group textarea:focus {
+      border-color: #6366f1;
+      /* indigo-500 */
+      outline: none;
+      box-shadow: 0 0 0 3px rgba(99, 102, 241, 0.2);
+      /* ring-indigo-200 */
+    }
+
+    .btn {
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      padding: 10px 20px;
+      border-radius: 8px;
+      font-weight: 600;
+      font-size: 0.875rem;
+      /* text-sm */
+      text-transform: uppercase;
+      letter-spacing: 0.05em;
+      transition: all 0.15s ease-in-out;
+      cursor: pointer;
+      border: none;
+      outline: none;
+    }
+
+    .btn-primary {
+      background-color: #6366f1;
+      /* indigo-600 */
+      color: #ffffff;
+    }
+
+    .btn-primary:hover {
+      background-color: #4f46e5;
+      /* indigo-700 */
+    }
+
+    .btn-green {
+      background-color: #10b981;
+      /* green-600 */
+      color: #ffffff;
+    }
+
+    .btn-green:hover {
+      background-color: #059669;
+      /* green-700 */
+    }
+
+    .btn-red {
+      background-color: #ef4444;
+      /* red-500 */
+      color: #ffffff;
+    }
+
+    .btn-red:hover {
+      background-color: #dc2626;
+      /* red-600 */
+    }
+
+    .btn:disabled {
+      opacity: 0.6;
+      cursor: not-allowed;
+    }
+
+    .result-box {
+      background-color: #f9fafb;
+      /* gray-50 */
+      padding: 16px;
+      border-radius: 8px;
+      border: 1px dashed #e5e7eb;
+      /* gray-200 */
+      color: #4b5563;
+      /* gray-700 */
+      font-family: monospace;
+      white-space: pre-wrap;
+      word-break: break-all;
+      margin-top: 16px;
+    }
+
+    .error-message {
+      color: #ef4444;
+      /* red-500 */
+      margin-top: 8px;
+      font-size: 0.875rem;
+    }
+
+    .success-message {
+      color: #10b981;
+      /* green-600 */
+      margin-top: 8px;
+      font-size: 0.875rem;
+    }
+
+    .loading-spinner {
+      border: 4px solid rgba(255, 255, 255, 0.3);
+      border-top: 4px solid #ffffff;
+      border-radius: 50%;
+      width: 20px;
+      height: 20px;
+      animation: spin 1s linear infinite;
+      margin-right: 8px;
+    }
+
+    @keyframes spin {
+      0% {
+        transform: rotate(0deg);
+      }
+
+      100% {
+        transform: rotate(360deg);
+      }
+    }
+  </style>
+</head>
+
+<body>
+  <div class="container">
+    <h1 class="text-3xl font-bold text-gray-900 mb-6 text-center">VeriDoc DApp</h1>
+    <p class="text-center text-gray-600 mb-6">Notarize and manage access to your documents on Viction Testnet.</p>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Wallet Connection</h2>
+      <p id="walletStatus" class="text-sm text-gray-600 mb-4">Not connected.</p>
+      <button id="connectWalletBtn" class="btn btn-primary">Connect MetaMask</button>
+      <p id="accountAddress" class="text-sm text-gray-800 mt-2 break-words"></p>
+      <p id="networkInfo" class="text-sm text-gray-800 break-words"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Notarize Document</h2>
+      <div class="input-group">
+        <label for="documentTitle">Document Title:</label>
+        <input type="text" id="documentTitle" placeholder="e.g., My Important Contract" class="rounded-md">
+      </div>
+      <div class="input-group">
+        <label for="documentFile">Upload Document (PDF, etc.):</label>
+        <input type="file" id="documentFile" accept=".pdf, .txt, .doc, .docx, .jpg, .png" class="rounded-md">
+        <p class="text-xs text-gray-500 mt-1">Select a file to generate its SHA-256 hash for notarization.</p>
+      </div>
+      <div class="input-group">
+        <label for="documentContent">Or Paste Text Content (if no file selected):</label>
+        <textarea id="documentContent" rows="5"
+          placeholder="Paste your document text here. A SHA-256 hash will be generated from this content if no file is selected."
+          class="rounded-md"></textarea>
+        <p class="text-xs text-gray-500 mt-1">If a file is selected above, this text input will be ignored.</p>
+      </div>
+      <button id="notarizeBtn" class="btn btn-green w-full">Notarize Document</button>
+      <div id="notarizeResult" class="result-box"></div>
+      <p id="notarizeError" class="error-message"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Get Document Details</h2>
+      <div class="input-group">
+        <label for="getDocHash">Document Hash (bytes32 hex):</label>
+        <input type="text" id="getDocHash" placeholder="e.g., 0xabcdef123..." class="rounded-md">
+      </div>
+      <button id="getDocBtn" class="btn btn-primary w-full">Get Details</button>
+      <div id="getDocResult" class="result-box"></div>
+      <p id="getDocError" class="error-message"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Manage Access</h2>
+      <div class="input-group">
+        <label for="accessDocHash">Document Hash (bytes32 hex):</label>
+        <input type="text" id="accessDocHash" placeholder="e.g., 0xabcdef123..." class="rounded-md">
+      </div>
+      <div class="input-group">
+        <label for="granteeAddress">Grantee Address:</label>
+        <input type="text" id="granteeAddress" placeholder="e.g., 0x123..." class="rounded-md">
+      </div>
+      <div class="flex space-x-4">
+        <button id="grantAccessBtn" class="btn btn-green flex-1">Grant Access</button>
+        <button id="revokeAccessBtn" class="btn btn-red flex-1">Revoke Access</button>
+      </div>
+      <div id="accessResult" class="result-box"></div>
+      <p id="accessError" class="error-message"></p>
+    </div>
+
+    <div class="mb-8 p-4 border border-gray-200 rounded-lg">
+      <h2 class="section-title">Check Access</h2>
+      <div class="input-group">
+        <label for="checkDocHash">Document Hash (bytes32 hex):</label>
+        <input type="text" id="checkDocHash" placeholder="e.g., 0xabcdef123..." class="rounded-md">
+      </div>
+      <div class="input-group">
+        <label for="checkUserAddress">User Address:</label>
+        <input type="text" id="checkUserAddress" placeholder="e.g., 0x123..." class="rounded-md">
+      </div>
+      <button id="checkAccessBtn" class="btn btn-primary w-full">Check Access</button>
+      <div id="checkAccessResult" class="result-box"></div>
+      <p id="checkAccessError" class="error-message"></p>
+    </div>
+  </div>
+
+  <script>
+    // --- Contract Configuration ---
+    const CONTRACT_ADDRESS = "0x4990D593fED746FC5C19069Bb39436374d16440a"; // <<< PASTE YOUR DEPLOYED CONTRACT ADDRESS HERE
+    const CONTRACT_ABI = [
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "documentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "grantee",
+            "type": "address"
+          }
+        ],
+        "name": "AccessGranted",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "documentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "grantee",
+            "type": "address"
+          }
+        ],
+        "name": "AccessRevoked",
+        "type": "event"
+      },
+      {
+        "anonymous": false,
+        "inputs": [
+          {
+            "indexed": true,
+            "internalType": "bytes32",
+            "name": "documentHash",
+            "type": "bytes32"
+          },
+          {
+            "indexed": true,
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "indexed": false,
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "indexed": false,
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          }
+        ],
+        "name": "DocumentNotarized",
+        "type": "event"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          }
+        ],
+        "name": "documents",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          },
+          {
+            "internalType": "bool",
+            "name": "exists",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "_documentHash",
+            "type": "bytes32"
+          }
+        ],
+        "name": "getDocumentDetails",
+        "outputs": [
+          {
+            "internalType": "address",
+            "name": "owner",
+            "type": "address"
+          },
+          {
+            "internalType": "uint256",
+            "name": "timestamp",
+            "type": "uint256"
+          },
+          {
+            "internalType": "string",
+            "name": "title",
+            "type": "string"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "_documentHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "_grantee",
+            "type": "address"
+          }
+        ],
+        "name": "grantAccess",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "",
+            "type": "address"
+          }
+        ],
+        "name": "grantedAccess",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "_documentHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "_user",
+            "type": "address"
+          }
+        ],
+        "name": "hasAccess",
+        "outputs": [
+          {
+            "internalType": "bool",
+            "name": "",
+            "type": "bool"
+          }
+        ],
+        "stateMutability": "view",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "_documentHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "string",
+            "name": "_title",
+            "type": "string"
+          }
+        ],
+        "name": "notarizeDocument",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      },
+      {
+        "inputs": [
+          {
+            "internalType": "bytes32",
+            "name": "_documentHash",
+            "type": "bytes32"
+          },
+          {
+            "internalType": "address",
+            "name": "_grantee",
+            "type": "address"
+          }
+        ],
+        "name": "revokeAccess",
+        "outputs": [],
+        "stateMutability": "nonpayable",
+        "type": "function"
+      }
+    ];
+    const VICTION_TESTNET_CHAIN_ID = 89; // Chain ID for Viction Testnet
+
+    // --- Global Ethers.js variables ---
+    let provider;
+    let signer;
+    let veriDocContract;
+    let currentAccount = null;
+
+    // --- DOM Elements ---
+    const walletStatus = document.getElementById('walletStatus');
+    const connectWalletBtn = document.getElementById('connectWalletBtn');
+    const accountAddress = document.getElementById('accountAddress');
+    const networkInfo = document.getElementById('networkInfo');
+
+    // Notarize Document
+    const documentTitleInput = document.getElementById('documentTitle');
+    const documentFileInput = document.getElementById('documentFile'); // New file input
+    const documentContentInput = document.getElementById('documentContent');
+    const notarizeBtn = document.getElementById('notarizeBtn');
+    const notarizeResult = document.getElementById('notarizeResult');
+    const notarizeError = document.getElementById('notarizeError');
+
+    // Get Document Details
+    const getDocHashInput = document.getElementById('getDocHash');
+    const getDocBtn = document.getElementById('getDocBtn');
+    const getDocResult = document.getElementById('getDocResult');
+    const getDocError = document.getElementById('getDocError');
+
+    // Manage Access
+    const accessDocHashInput = document.getElementById('accessDocHash');
+    const granteeAddressInput = document.getElementById('granteeAddress');
+    const grantAccessBtn = document.getElementById('grantAccessBtn');
+    const revokeAccessBtn = document.getElementById('revokeAccessBtn');
+    const accessResult = document.getElementById('accessResult');
+    const accessError = document.getElementById('accessError');
+
+    // Check Access
+    const checkDocHashInput = document.getElementById('checkDocHash');
+    const checkUserAddressInput = document.getElementById('checkUserAddress');
+    const checkAccessBtn = document.getElementById('checkAccessBtn');
+    const checkAccessResult = document.getElementById('checkAccessResult');
+    const checkAccessError = document.getElementById('checkAccessError');
+
+
+    // --- Utility Functions ---
+    function clearMessages() {
+      notarizeError.textContent = '';
+      getDocError.textContent = '';
+      accessError.textContent = '';
+      checkAccessError.textContent = '';
+      // Clear results as well for clarity
+      notarizeResult.textContent = '';
+      getDocResult.textContent = '';
+      accessResult.textContent = '';
+      checkAccessResult.textContent = '';
+    }
+
+    function showLoading(buttonElement) {
+      buttonElement.disabled = true;
+      buttonElement.innerHTML = `<span class="loading-spinner"></span> Loading...`;
+    }
+
+    function hideLoading(buttonElement, originalText) {
+      buttonElement.disabled = false;
+      buttonElement.innerHTML = originalText;
+    }
+
+    // Function to convert ArrayBuffer to hex string
+    function arrayBufferToHex(buffer) {
+      return '0x' + Array.prototype.map.call(new Uint8Array(buffer), x => ('00' + x.toString(16)).slice(-2)).join('');
+    }
+
+    // --- Wallet Connection ---
+    async function connectWallet() {
+      clearMessages();
+      if (typeof ethers === 'undefined' || typeof window.ethereum === 'undefined') {
+        walletStatus.textContent = 'MetaMask or Ethers.js is not loaded. Please ensure your browser supports Web3 and try again.';
+        walletStatus.classList.add('error-message');
+        connectWalletBtn.disabled = true;
+        return;
+      }
+
+      try {
+        showLoading(connectWalletBtn);
+        const accounts = await window.ethereum.request({ method: 'eth_requestAccounts' });
+        currentAccount = accounts[0];
+        accountAddress.textContent = `Connected Account: ${currentAccount}`;
+
+        provider = new ethers.providers.Web3Provider(window.ethereum);
+        signer = provider.getSigner();
+        veriDocContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+
+        const network = await provider.getNetwork();
+        let networkNameDisplay = network.name;
+        if (network.chainId === VICTION_TESTNET_CHAIN_ID) {
+          networkNameDisplay = 'Viction Testnet'; // Override "unknown" if it's Viction Testnet
+        }
+
+        if (network.chainId !== VICTION_TESTNET_CHAIN_ID) {
+          walletStatus.textContent = `Connected to incorrect network (Chain ID: ${network.chainId}). Please switch to Viction Testnet (Chain ID: ${VICTION_TESTNET_CHAIN_ID}).`;
+          walletStatus.classList.add('error-message');
+          veriDocContract = null; // Disable contract interaction
+        } else {
+          walletStatus.textContent = 'Connected to Viction Testnet!';
+          walletStatus.classList.remove('error-message');
+          walletStatus.classList.add('text-green-600');
+          networkInfo.textContent = `Network: ${networkNameDisplay} (Chain ID: ${network.chainId})`;
+        }
+
+        // Listen for account changes
+        window.ethereum.on('accountsChanged', handleAccountsChanged);
+        window.ethereum.on('chainChanged', handleChainChanged);
+
+      } catch (error) {
+        console.error("Error connecting wallet:", error);
+        walletStatus.textContent = `Wallet connection failed: ${error.message}`;
+        walletStatus.classList.add('error-message');
+      } finally {
+        hideLoading(connectWalletBtn, 'Connect MetaMask');
+      }
+    }
+
+    function handleAccountsChanged(accounts) {
+      if (accounts.length === 0) {
+        walletStatus.textContent = 'Disconnected from MetaMask.';
+        accountAddress.textContent = '';
+        networkInfo.textContent = '';
+        currentAccount = null;
+        veriDocContract = null;
+      } else if (accounts[0] !== currentAccount) {
+        currentAccount = accounts[0];
+        accountAddress.textContent = `Connected Account: ${currentAccount}`;
+        if (provider) {
+          signer = provider.getSigner();
+          veriDocContract = new ethers.Contract(CONTRACT_ADDRESS, CONTRACT_ABI, signer);
+        }
+        walletStatus.textContent = 'Account changed. Reconnected.';
+        walletStatus.classList.remove('error-message');
+        walletStatus.classList.add('text-green-600');
+      }
+    }
+
+    function handleChainChanged(chainId) {
+      window.location.reload(); // Recommended to reload on chain changes
+    }
+
+    // --- Contract Interaction Functions ---
+
+    async function notarizeDocument() {
+      clearMessages();
+      if (!veriDocContract) {
+        notarizeError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+
+      const title = documentTitleInput.value.trim();
+      let documentHash = '';
+
+      if (!title) {
+        notarizeError.textContent = 'Please enter a document title.';
+        return;
+      }
+
+      try {
+        showLoading(notarizeBtn);
+
+        if (documentFileInput.files.length > 0) {
+          // Read file content as ArrayBuffer
+          const file = documentFileInput.files[0];
+          const reader = new FileReader();
+
+          reader.onload = async (e) => {
+            const fileBuffer = e.target.result; // ArrayBuffer
+            const hashBuffer = await crypto.subtle.digest('SHA-256', fileBuffer);
+            documentHash = arrayBufferToHex(hashBuffer);
+            await sendNotarizeTransaction(documentHash, title);
+          };
+
+          reader.onerror = (e) => {
+            console.error("FileReader error:", e);
+            notarizeError.textContent = `Error reading file: ${e.target.error.name}`;
+            hideLoading(notarizeBtn, 'Notarize Document');
+          };
+
+          reader.readAsArrayBuffer(file); // Read file as ArrayBuffer for hashing
+        } else {
+          // Fallback to text content if no file is selected
+          const content = documentContentInput.value.trim();
+          if (!content) {
+            notarizeError.textContent = 'Please select a file or enter text content to hash.';
+            hideLoading(notarizeBtn, 'Notarize Document');
+            return;
+          }
+          const textEncoder = new TextEncoder();
+          const data = textEncoder.encode(content);
+          const hashBuffer = await crypto.subtle.digest('SHA-256', data);
+          documentHash = arrayBufferToHex(hashBuffer);
+          await sendNotarizeTransaction(documentHash, title);
+        }
+
+      } catch (error) {
+        console.error("Error initiating notarization:", error);
+        notarizeError.textContent = `Error: ${error.message || error.reason || 'An unknown error occurred.'}`;
+        notarizeResult.textContent = '';
+        notarizeResult.classList.remove('success-message');
+        hideLoading(notarizeBtn, 'Notarize Document');
+      }
+    }
+
+    async function sendNotarizeTransaction(documentHash, title) {
+      try {
+        notarizeResult.textContent = `Generated Document Hash: ${documentHash}\nSending transaction...`;
+        const tx = await veriDocContract.notarizeDocument(documentHash, title);
+        notarizeResult.textContent += `\nTransaction sent: ${tx.hash}\nWaiting for confirmation...`;
+        await tx.wait(); // Wait for the transaction to be mined
+        notarizeResult.textContent = `Document '${title}' notarized successfully!\nTransaction Hash: ${tx.hash}\nDocument Hash (for retrieval): ${documentHash}`;
+        notarizeResult.classList.add('success-message');
+
+        // Optionally, pre-fill hash for retrieval/access management
+        getDocHashInput.value = documentHash;
+        accessDocHashInput.value = documentHash;
+        checkDocHashInput.value = documentHash;
+      } catch (error) {
+        console.error("Error during notarize transaction:", error);
+        notarizeError.textContent = `Error: ${error.message || error.reason || 'An unknown error occurred during transaction.'}`;
+        notarizeResult.textContent = '';
+        notarizeResult.classList.remove('success-message');
+      } finally {
+        hideLoading(notarizeBtn, 'Notarize Document');
+      }
+    }
+
+
+    async function getDocumentDetails() {
+      clearMessages();
+      if (!veriDocContract) {
+        getDocError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+
+      const docHash = getDocHashInput.value.trim();
+      if (!docHash || !docHash.startsWith('0x') || docHash.length !== 66) { // 0x + 32 bytes * 2 chars/byte = 66
+        getDocError.textContent = 'Please enter a valid 32-byte hex document hash (e.g., 0x...).';
+        return;
+      }
+
+      try {
+        showLoading(getDocBtn);
+        const [owner, timestamp, title] = await veriDocContract.getDocumentDetails(docHash);
+        const date = new Date(timestamp * 1000); // Convert Unix timestamp to Date object
+        getDocResult.textContent = `Owner: ${owner}\nTimestamp: ${date.toLocaleString()}\nTitle: ${title}`;
+      } catch (error) {
+        console.error("Error getting document details:", error);
+        getDocError.textContent = `Error: ${error.message || error.reason || 'Document not found or invalid hash.'}`;
+      } finally {
+        hideLoading(getDocBtn, 'Get Details');
+      }
+    }
+
+    async function manageAccess(action) {
+      clearMessages();
+      if (!veriDocContract) {
+        accessError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+
+      const docHash = accessDocHashInput.value.trim();
+      const granteeAddr = granteeAddressInput.value.trim();
+
+      if (!docHash || !docHash.startsWith('0x') || docHash.length !== 66) {
+        accessError.textContent = 'Please enter a valid document hash.';
+        return;
+      }
+      if (!ethers.utils.isAddress(granteeAddr)) {
+        accessError.textContent = 'Please enter a valid grantee Ethereum address.';
+        return;
+      }
+
+      const btn = action === 'grant' ? grantAccessBtn : revokeAccessBtn;
+      const originalText = action === 'grant' ? 'Grant Access' : 'Revoke Access';
+
+      try {
+        showLoading(btn);
+        let tx;
+        if (action === 'grant') {
+          tx = await veriDocContract.grantAccess(docHash, granteeAddr);
+          accessResult.textContent = `Granting access transaction sent: ${tx.hash}\nWaiting for confirmation...`;
+        } else {
+          tx = await veriDocContract.revokeAccess(docHash, granteeAddr);
+          accessResult.textContent = `Revoking access transaction sent: ${tx.hash}\nWaiting for confirmation...`;
+        }
+
+        await tx.wait();
+        accessResult.textContent = `Access ${action === 'grant' ? 'granted' : 'revoked'} for ${granteeAddr} to document ${docHash}!\nTransaction Hash: ${tx.hash}`;
+        accessResult.classList.add('success-message');
+
+      } catch (error) {
+        console.error(`Error ${action}ing access:`, error);
+        accessError.textContent = `Error: ${error.message || error.reason || 'An unknown error occurred.'}`;
+        accessResult.textContent = '';
+        accessResult.classList.remove('success-message');
+      } finally {
+        hideLoading(btn, originalText);
+      }
+    }
+
+    async function checkAccess() {
+      clearMessages();
+      if (!veriDocContract) {
+        checkAccessError.textContent = 'Wallet not connected or on incorrect network.';
+        return;
+      }
+
+      const docHash = checkDocHashInput.value.trim();
+      const userAddr = checkUserAddressInput.value.trim();
+
+      if (!docHash || !docHash.startsWith('0x') || docHash.length !== 66) {
+        checkAccessError.textContent = 'Please enter a valid document hash.';
+        return;
+      }
+      if (!ethers.utils.isAddress(userAddr)) {
+        checkAccessError.textContent = 'Please enter a valid user Ethereum address.';
+        return;
+      }
+
+      try {
+        showLoading(checkAccessBtn);
+        const hasAccess = await veriDocContract.hasAccess(docHash, userAddr);
+        checkAccessResult.textContent = `User ${userAddr} ${hasAccess ? 'HAS' : 'DOES NOT HAVE'} access to document ${docHash}.`;
+        checkAccessResult.classList.add(hasAccess ? 'success-message' : 'error-message');
+      } catch (error) {
+        console.error("Error checking access:", error);
+        checkAccessError.textContent = `Error: ${error.message || error.reason || 'An unknown error occurred.'}`;
+        checkAccessResult.textContent = '';
+        checkAccessResult.classList.remove('success-message', 'error-message');
+      } finally {
+        hideLoading(checkAccessBtn, 'Check Access');
+      }
+    }
+
+
+    // --- Event Listeners ---
+    connectWalletBtn.addEventListener('click', connectWallet);
+    notarizeBtn.addEventListener('click', notarizeDocument);
+    getDocBtn.addEventListener('click', getDocumentDetails);
+    grantAccessBtn.addEventListener('click', () => manageAccess('grant'));
+    revokeAccessBtn.addEventListener('click', () => manageAccess('revoke'));
+    checkAccessBtn.addEventListener('click', checkAccess);
+
+    // Initial check for MetaMask connection on page load
+    window.addEventListener('load', () => {
+      if (typeof ethers === 'undefined') {
+        walletStatus.textContent = 'Ethers.js is not loaded. Please check your internet connection or CDN link.';
+        walletStatus.classList.add('error-message');
+        connectWalletBtn.disabled = true;
+        return;
+      }
+
+      if (typeof window.ethereum !== 'undefined') {
+        connectWalletBtn.textContent = 'Connect MetaMask';
+        window.ethereum.request({ method: 'eth_accounts' })
+          .then(handleAccountsChanged)
+          .catch((err) => {
+            console.error("Error on initial eth_accounts check:", err);
+            walletStatus.textContent = `Error checking MetaMask accounts: ${err.message}`;
+            walletStatus.classList.add('error-message');
+          });
+      } else {
+        walletStatus.textContent = 'MetaMask is not installed. Please install it to use this DApp.';
+        walletStatus.classList.add('error-message');
+        connectWalletBtn.disabled = true;
+      }
+    });
+
+  </script>
+</body>
+
+</html>
