@@ -1,19 +1,39 @@
-import React from 'react';
-import ReactDOM from 'react-dom/client';
-import './index.css';
-import App from './App';
-import reportWebVitals from './reportWebVitals';
+// src/index.tsx
+import React from "react";
+import ReactDOM from "react-dom/client";
+import App from "./App.tsx";
+import "./index.css";
 
-const root = ReactDOM.createRoot(
-  document.getElementById('root') as HTMLElement
-);
-root.render(
+// wagmi + web3modal
+import { WagmiConfig } from "wagmi";
+import { createWeb3Modal } from "@web3modal/wagmi/react";
+
+// wagmi config & chains
+import { wagmiConfig } from "./wagmiConfig.ts";
+
+// ✅ Import React Query
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+
+// Your WalletConnect project ID (replace with actual one)
+const projectId = "YOUR_WALLETCONNECT_PROJECT_ID";
+
+// 1. Create the QueryClient instance
+const queryClient = new QueryClient();
+
+// 2. Init Web3Modal
+createWeb3Modal({
+  wagmiConfig,
+  projectId,
+  enableAnalytics: true,
+  themeMode: "light",
+});
+
+ReactDOM.createRoot(document.getElementById("root")!).render(
   <React.StrictMode>
-    <App />
+    <WagmiConfig config={wagmiConfig}>
+      <QueryClientProvider client={queryClient}>
+        <App />
+      </QueryClientProvider>
+    </WagmiConfig>
   </React.StrictMode>
 );
-
-// If you want to start measuring performance in your app, pass a function
-// to log results (for example: reportWebVitals(console.log))
-// or send to an analytics endpoint. Learn more: https://bit.ly/CRA-vitals
-reportWebVitals();

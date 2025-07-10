@@ -1,9 +1,10 @@
 import React from "react";
-import { useAccount, useNetwork, useBalance } from "wagmi";
-// import { Web3Button, Web3NetworkSwitch } from "@web3modal/wagmi/react";
+import { useAccount, useBalance, useWalletClient } from "wagmi";
 import { Web3Button, Web3NetworkSwitch } from "@web3modal/react";
-import { ethers } from "ethers"; // For handling amounts if not using viem's parseUnits
-import { parseUnits } from "viem"; // For handling amounts if using viem
+import { ethers } from "ethers"; // Optional, depending on whether you're using viem or ethers
+import { parseUnits } from "viem";
+// import { useNetwork } from "wagmi";
+import { useChainId, useConfig } from "wagmi";
 
 // Replace with the ABI of your deployed SimpleVRC25Token contract
 const SimpleVRC25TokenABI = [
@@ -475,18 +476,22 @@ const VRC25_CONTRACT_ADDRESS = "YOUR_DEPLOYED_CONTRACT_ADDRESS";
 
 function App() {
   const { address, isConnected } = useAccount();
-  const { chain } = useNetwork();
+  // const { chain } = useNetwork();
+  const chainId = useChainId();
+  const config = useConfig();
+  const chain = config.chains.find((c) => c.id === chainId);
+
+  const { data: client } = useWalletClient();
+
   const { data: vicBalance } = useBalance({
-    address: address,
+    address,
     chainId: chain?.id,
   });
+
   const { data: tokenBalance, refetch: refetchTokenBalance } = useBalance({
-    address: address,
+    address: isConnected ? address : undefined,
     token: VRC25_CONTRACT_ADDRESS as `0x${string}`,
-    chainId: chain?.id,
-    enabled:
-      isConnected &&
-      VRC25_CONTRACT_ADDRESS !== "YOUR_DEPLOYED_CONTRACT_ADDRESS", // Only get balance if connected and contract address is set
+    chainId: isConnected ? chain?.id : undefined,
   });
 
   const handleTransfer = async (event: React.FormEvent) => {
@@ -495,52 +500,34 @@ function App() {
     const recipient = formData.get("recipient") as `0x${string}`;
     const amountStr = formData.get("amount") as string;
 
-    if (!isConnected || !address || !chain) {
+    if (!isConnected || !address || !chain || !client) {
       alert("Please connect your wallet.");
       return;
     }
 
     try {
-      // In a real app, you'd use wagmi's built-in ways to get provider/signer
-      // For this simple example, we'll create them manually
-      // const provider = new ethers.providers.JsonRpcProvider(
-      //   chain.rpcUrls.default.http
-      // );
-
-      const provider = new ethers.providers.JsonRpcProvider(
-        chain.rpcUrls.default.http[0] // pick the first URL if it's an array
-      );
-
-      // const signer = new ethers.Wallet(
-      //   process.env.REACT_APP_PRIVATE_KEY | "",
-      //   provider
-      // ); // Load private key securely (for development only!)
-
-      const privateKey = process.env.REACT_APP_PRIVATE_KEY;
-
-      if (!privateKey) {
-        throw new Error("Private key is missing!");
-      }
-
-      const signer = new ethers.Wallet(privateKey, provider);
+      const signer = new ethers.providers.Web3Provider(
+        client.transport,
+        "any"
+      ).getSigner();
 
       const tokenContract = new ethers.Contract(
         VRC25_CONTRACT_ADDRESS,
         SimpleVRC25TokenABI,
         signer
       );
-      // Get decimals from the contract
+
       const tokenDecimals = await tokenContract.decimals();
-      const amount = parseUnits(amountStr, tokenDecimals); // Use parseUnits to format amount
-      console.log(`Transferring ${amountStr} tokens to ${recipient}...`);
+      const amount = parseUnits(amountStr, tokenDecimals);
       const tx = await tokenContract.transfer(recipient, amount);
+
       console.log("Transaction sent:", tx.hash);
-      await tx.wait(); // Wait for the transaction to be confirmed
+      await tx.wait();
       alert("Transfer successful!");
-      refetchTokenBalance(); // Update balance display
-    } catch (error) {
-      console.error("Transfer failed:", error);
-      alert(`Transfer failed: ${(error as Error).message}`);
+      refetchTokenBalance();
+    } catch (err: any) {
+      console.error(err);
+      alert("Transfer failed: " + err.message);
     }
   };
 
@@ -552,7 +539,7 @@ function App() {
         <h2>Wallet Connection</h2>
         <Web3Button />
         {isConnected && (
-          <div style={{ marginTop: "10px" }}>
+          <>
             <p>Connected Address: {address}</p>
             <p>
               Network: {chain?.name} (Chain ID: {chain?.id})
@@ -565,43 +552,40 @@ function App() {
               {tokenBalance?.symbol}
             </p>
             <Web3NetworkSwitch />
-          </div>
+          </>
         )}
       </div>
 
       {isConnected && (
-        <div style={{ marginBottom: "20px" }}>
+        <form onSubmit={handleTransfer}>
           <h2>VRC25 Token Transfer</h2>
-          <form onSubmit={handleTransfer}>
-            <div style={{ marginBottom: "10px" }}>
-              <label htmlFor="recipient">Recipient Address:</label>
-              <input
-                type="text"
-                id="recipient"
-                name="recipient"
-                required
-                style={{ marginLeft: "10px", width: "300px", padding: "5px" }}
-              />
-            </div>
-            <div style={{ marginBottom: "10px" }}>
-              <label htmlFor="amount">Amount:</label>
-              <input
-                type="number"
-                id="amount"
-                name="amount"
-                step="any"
-                required
-                style={{ marginLeft: "10px", width: "150px", padding: "5px" }}
-              />
-            </div>
-            <button
-              type="submit"
-              style={{ padding: "10px 20px", cursor: "pointer" }}
-            >
-              Transfer VRC25 Tokens
-            </button>
-          </form>
-        </div>
+          <label>
+            Recipient Address:
+            <input
+              name="recipient"
+              required
+              style={{ marginLeft: 10, width: "300px" }}
+            />
+          </label>
+          <br />
+          <label>
+            Amount:
+            <input
+              name="amount"
+              type="number"
+              step="any"
+              required
+              style={{ marginLeft: 10, width: "150px", marginTop: 10 }}
+            />
+          </label>
+          <br />
+          <button
+            type="submit"
+            style={{ marginTop: 15, padding: "10px 20px", cursor: "pointer" }}
+          >
+            Transfer VRC25 Tokens
+          </button>
+        </form>
       )}
     </div>
   );

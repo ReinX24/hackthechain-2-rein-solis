@@ -19,9 +19,8 @@
     "react": "^19.1.0",
     "react-dom": "^19.1.0",
     "react-scripts": "5.0.1",
-    "typescript": "^5.8.3",
-    "viem": "^1.4.0",
-    "wagmi": "^0.12.10",
+    "viem": "^2.31.7",
+    "wagmi": "^2.15.6",
     "web-vitals": "^2.1.4"
   },
   "scripts": {
@@ -47,5 +46,8 @@
       "last 1 firefox version",
       "last 1 safari version"
     ]
+  },
+  "devDependencies": {
+    "typescript": "^5.4.5"
   }
 }
