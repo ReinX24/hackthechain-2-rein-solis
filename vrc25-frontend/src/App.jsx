@@ -1,6 +1,7 @@
 import { useEffect, useState } from "react";
 import { ethers } from "ethers";
 import { VRC25_ABI } from "./abi";
+import firebaseApp from "./firebase";
 
 const CONTRACT_ADDRESS = "0x7B23d1a3aDF2301A4D642Caf7A70ea3C37585eeB"; // Replace this!
 
@@ -32,27 +33,33 @@ function App() {
   const [minFee, setMinFee] = useState("");
   const [newMinFee, setNewMinFee] = useState("");
 
+  const [chainId, setChainId] = useState("");
+  const [networkName, setNetworkName] = useState("");
+
   const connectWallet = async () => {
     const prov = new ethers.BrowserProvider(window.ethereum);
     const signer = await prov.getSigner();
     const contract = new ethers.Contract(CONTRACT_ADDRESS, VRC25_ABI, signer);
     const address = await signer.getAddress();
+    const decimals = await contract.decimals();
 
     const name = await contract.name();
     const symbol = await contract.symbol();
-    const decimals = await contract.decimals();
     const balance = await contract.balanceOf(address);
     const fee = await contract.minFee();
+    const network = await prov.getNetwork(); // Get network details
 
     setProvider(prov);
     setSigner(signer);
     setContract(contract);
     setAccount(address);
+    setDecimals(decimals);
     setName(name);
     setSymbol(symbol);
-    setDecimals(decimals);
     setBalance(ethers.formatUnits(balance, decimals));
     setMinFee(ethers.formatUnits(fee, decimals));
+    setChainId(network.chainId);
+    setNetworkName(network.name);
   };
 
   const refreshBalance = async () => {
@@ -111,10 +118,13 @@ function App() {
             <strong>Token:</strong> {name} ({symbol})
           </p>
           <p>
-            <strong>Balance:</strong> {balance}
+            <strong>Token Balance:</strong> {balance} {symbol}
           </p>
           <p>
             <strong>Min Fee:</strong> {minFee} {symbol}
+          </p>
+          <p>
+            <strong>Network:</strong> {networkName} (Chain ID: {chainId})
           </p>
 
           <hr />
