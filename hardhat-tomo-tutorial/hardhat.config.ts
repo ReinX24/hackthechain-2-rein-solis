@@ -29,6 +29,13 @@ const config = {
     cache: "./cache", // Hardhat's temporary files
     artifacts: "./artifacts", // Compiled contract files
   },
+  // --- Add Typechain configuration ---
+  // typechain: {
+  //   outDir: "typechain-types", // This is the default directory where types will be generated
+  //   target: "ethers-v6", // Or "ethers-v5" if you're using ethers@5
+  //   alwaysGenerate: true, // Regenerate types on every compile
+  //   externalArtifacts: ["artifacts/**/*.json"], // Optional: include artifacts outside of the default Hardhat path
+  // },
 };
 
 export default config;

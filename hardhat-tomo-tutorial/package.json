@@ -12,11 +12,13 @@
     "@nomicfoundation/hardhat-toolbox": "^6.0.0",
     "@typechain/ethers-v6": "^0.5.1",
     "@typechain/hardhat": "^9.1.0",
+    "@types/readline-sync": "^1.4.8",
     "dotenv": "^17.1.0",
     "hardhat": "^2.25.0",
     "typechain": "^8.3.2"
   },
   "dependencies": {
-    "@openzeppelin/contracts": "^4.9.3"
+    "@openzeppelin/contracts": "^4.9.3",
+    "readline-sync": "^1.4.10"
   }
 }
