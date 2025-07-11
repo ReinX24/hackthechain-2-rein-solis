@@ -1,0 +1,208 @@
+<!DOCTYPE html>
+<html lang="en">
+<!-- Run Application: npx serve . -->
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Land Registry Dashboard</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
+</head>
+
+<body class="flex min-h-screen bg-blue-50 text-gray-800">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-teal-900 text-white p-6">
+    <h2 class="text-2xl font-bold mb-8">🏛 Titlestone</h2>
+    <ul class="space-y-4 text-lg">
+      <li><a href="index.html" class="text-teal-200 font-semibold">📊 Dashboard</a></li>
+      <li><a href="register.html" class="hover:text-white">📝 Register Title</a></li>
+      <li><a href="search.html" class="hover:text-white">🔍 Search Records</a></li>
+      <li><a href="transfer.html" class="hover:text-white">🔁 Transfer Ownership</a></li>
+      <li><a href="notarize.html" class="hover:text-white">📜 Digital Notary</a></li>
+      <li><a href="notary-records.html" class="hover:text-white">📄 Notarized Records</a></li>
+      <li><a href="sell-land.html" class="hover:text-white">🏠 Sell Land</a></li>
+    </ul>
+
+    <!-- Wallet Connection UI -->
+    <div id="wallet-section" class="mt-10">
+      <button id="connectWalletBtn"
+        class="bg-teal-700 hover:bg-teal-600 text-white font-semibold px-4 py-2 rounded w-full">
+        🔌 Connect Wallet
+      </button>
+
+      <div id="walletInfo" class="hidden mt-4 space-y-2">
+        <div class="text-sm break-all font-mono bg-teal-800 px-3 py-2 rounded">
+          <span id="walletAddress">0x...</span>
+        </div>
+        <button id="disconnectBtn"
+          class="bg-red-600 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded w-full">
+          ❌ Disconnect
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8">
+    <h1 class="text-4xl font-bold mb-6">Dashboard</h1>
+
+    <!-- Summary Cards -->
+    <div class="grid grid-cols-2 md:grid-cols-4 gap-4 mb-8">
+      <div class="bg-white p-4 rounded-xl shadow text-center">
+        <div class="text-3xl">🏘</div>
+        <div><strong id="totalProperties">0</strong></div>
+        <div class="text-sm text-gray-500">Properties Registered</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow text-center">
+        <div class="text-3xl">📄</div>
+        <div><strong id="totalTransactions">0</strong></div>
+        <div class="text-sm text-gray-500">Total Transactions</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow text-center">
+        <div class="text-3xl">📜</div>
+        <div><strong>3</strong></div>
+        <div class="text-sm text-gray-500">Notarized Titles</div>
+      </div>
+      <div class="bg-white p-4 rounded-xl shadow text-center">
+        <div class="text-3xl">👤</div>
+        <div><strong id="totalOwners">0</strong></div>
+        <div class="text-sm text-gray-500">Total Owners</div>
+      </div>
+    </div>
+
+    <!-- Dashboard Content -->
+    <div class="grid grid-cols-1 lg:grid-cols-2 gap-8">
+      <!-- Land Table -->
+      <div>
+        <h2 class="text-2xl font-semibold mb-4">Registered Titles</h2>
+        <div class="overflow-auto bg-white rounded-xl shadow">
+          <table class="min-w-full table-auto text-sm text-left">
+            <thead class="bg-gray-100 text-gray-700 font-medium">
+              <tr>
+                <th class="p-3">ID</th>
+                <th class="p-3">Original Owner Name</th>
+                <th class="p-3">Wallet Address</th>
+                <th class="p-3">Location</th>
+                <th class="p-3">Area (sqm)</th>
+              </tr>
+            </thead>
+            <tbody id="landTable"></tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- Interactive Map -->
+      <div>
+        <h2 class="text-2xl font-semibold mb-4">Interactive Property Map</h2>
+        <div id="mapButtons" class="flex flex-wrap gap-2 mb-4"></div>
+
+        <div id="landInfo" class="bg-white rounded-xl shadow p-4" style="display: none;">
+          <h3 class="text-lg font-bold">Title ID: <span id="info-id" class="text-blue-600"></span></h3>
+          <p><strong>Owner:</strong> <span id="info-owner"></span></p>
+          <p><strong>Address:</strong> <span id="info-location"></span></p>
+          <p><strong>Area:</strong> <span id="info-area"></span> sq. m.</p>
+        </div>
+      </div>
+    </div>
+  </main>
+
+  <!-- Load and display lands -->
+  <script type="module">
+    import { getAllLands } from './contract.js';
+
+    async function loadLands() {
+      const lands = await getAllLands();
+      const table = document.querySelector('#landTable');
+      const mapButtons = document.getElementById('mapButtons');
+      const owners = new Set();
+
+      lands.forEach((land) => {
+        // Add to table
+        const row = document.createElement('tr');
+        row.className = 'border-t';
+        row.innerHTML = `
+          <td class="p-1 text-blue-700">T-${land.id}</td>
+          <td class="p-3">${land.ownerName}</td>
+          <td class="p-3 text-xs break-all">${land.owner}</td>
+          <td class="p-3">${land.location}</td>
+          <td class="p-3">${land.squareMeters}</td>
+        `;
+        table.appendChild(row);
+
+        // Add map button
+        const btn = document.createElement('button');
+        btn.className = 'px-4 py-2 bg-orange-400 hover:bg-orange-500 text-white rounded-full';
+        btn.textContent = `T-${land.id}`;
+        btn.onclick = () => {
+          document.getElementById('landInfo').style.display = 'block';
+          document.getElementById('info-id').textContent = `T-${land.id}`;
+          document.getElementById('info-owner').textContent = `${land.ownerName} (${land.owner})`;
+          document.getElementById('info-location').textContent = land.location;
+          document.getElementById('info-area').textContent = land.squareMeters;
+        };
+        mapButtons.appendChild(btn);
+
+        owners.add(land.owner);
+      });
+
+      document.getElementById('totalProperties').textContent = lands.length;
+      document.getElementById('totalOwners').textContent = owners.size;
+      document.getElementById('totalTransactions').textContent = lands.length;
+    }
+
+    loadLands();
+  </script>
+
+  <!-- Wallet Connect Script -->
+  <script>
+    const connectBtn = document.getElementById("connectWalletBtn");
+    const walletInfo = document.getElementById("walletInfo");
+    const walletAddressSpan = document.getElementById("walletAddress");
+    const disconnectBtn = document.getElementById("disconnectBtn");
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert("🦊 Please install MetaMask to connect your wallet.");
+        return;
+      }
+
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send("eth_requestAccounts", []);
+        const address = accounts[0];
+
+        const shortAddress = `${address.slice(0, 6)}...${address.slice(-4)}`;
+        walletAddressSpan.textContent = shortAddress;
+
+        connectBtn.classList.add("hidden");
+        walletInfo.classList.remove("hidden");
+
+        sessionStorage.setItem("walletAddress", address);
+      } catch (err) {
+        console.error("Connection failed:", err);
+      }
+    }
+
+    function disconnectWallet() {
+      sessionStorage.removeItem("walletAddress");
+      connectBtn.classList.remove("hidden");
+      walletInfo.classList.add("hidden");
+      walletAddressSpan.textContent = "";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const saved = sessionStorage.getItem("walletAddress");
+      if (saved) {
+        walletAddressSpan.textContent = `${saved.slice(0, 6)}...${saved.slice(-4)}`;
+        connectBtn.classList.add("hidden");
+        walletInfo.classList.remove("hidden");
+      }
+    });
+
+    connectBtn.addEventListener("click", connectWallet);
+    disconnectBtn.addEventListener("click", disconnectWallet);
+  </script>
+</body>
+
+</html>

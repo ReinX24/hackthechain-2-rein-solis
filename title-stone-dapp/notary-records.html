@@ -1,0 +1,111 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>📄 Notarized Records</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
+</head>
+
+<body class="flex min-h-screen bg-blue-50 text-gray-800">
+
+  <!-- Sidebar -->
+  <aside class="w-64 bg-teal-900 text-white p-6">
+    <h2 class="text-2xl font-bold mb-8">🏛 Titlestone</h2>
+    <ul class="space-y-4 text-lg">
+      <li><a href="index.html" class="hover:text-white">📊 Dashboard</a></li>
+      <li><a href="register.html" class="hover:text-white">📝 Register Title</a></li>
+      <li><a href="search.html" class="hover:text-white">🔍 Search Records</a></li>
+      <li><a href="transfer.html" class="hover:text-white">🔁 Transfer Ownership</a></li>
+      <li><a href="notarize.html" class="hover:text-white">📜 Digital Notary</a></li>
+      <li><a href="notary-records.html" class="text-teal-200 font-semibold">📄 Notarized Records</a></li>
+    </ul>
+
+    <!-- Wallet Connect -->
+    <div id="wallet-section" class="mt-10">
+      <button id="connectWalletBtn"
+        class="bg-teal-700 hover:bg-teal-600 text-white font-semibold px-4 py-2 rounded w-full">
+        🔌 Connect Wallet
+      </button>
+      <div id="walletInfo" class="hidden mt-4 space-y-2">
+        <div class="text-sm break-all font-mono bg-teal-800 px-3 py-2 rounded">
+          <span id="walletAddress">0x...</span>
+        </div>
+        <button id="disconnectBtn"
+          class="bg-red-600 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded w-full">
+          ❌ Disconnect
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8">
+    <h1 class="text-4xl font-bold mb-6">📄 Notarized Records</h1>
+
+    <div class="bg-white p-6 rounded-xl shadow-md">
+      <table class="w-full table-auto border border-gray-300 text-sm">
+        <thead class="bg-teal-700 text-white">
+          <tr>
+            <th class="p-2">Doc ID</th>
+            <th class="p-2">Land ID</th>
+            <th class="p-2">Document URL</th>
+            <th class="p-2">✅ Valid</th>
+            <th class="p-2">❌ Invalid</th>
+            <th class="p-2">🗳 Vote</th>
+          </tr>
+        </thead>
+        <tbody id="recordsTable" class="bg-white text-gray-800"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script type="module" src="./notary-records.js"></script>
+
+  <!-- Wallet Connect Logic -->
+  <script>
+    const connectBtn = document.getElementById("connectWalletBtn");
+    const walletInfo = document.getElementById("walletInfo");
+    const walletAddressSpan = document.getElementById("walletAddress");
+    const disconnectBtn = document.getElementById("disconnectBtn");
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        alert("🦊 Please install MetaMask.");
+        return;
+      }
+
+      const provider = new ethers.BrowserProvider(window.ethereum);
+      const accounts = await provider.send("eth_requestAccounts", []);
+      const address = accounts[0];
+
+      walletAddressSpan.textContent = `${address.slice(0, 6)}...${address.slice(-4)}`;
+      connectBtn.classList.add("hidden");
+      walletInfo.classList.remove("hidden");
+      sessionStorage.setItem("walletAddress", address);
+    }
+
+    function disconnectWallet() {
+      sessionStorage.removeItem("walletAddress");
+      connectBtn.classList.remove("hidden");
+      walletInfo.classList.add("hidden");
+      walletAddressSpan.textContent = "";
+    }
+
+    window.addEventListener("DOMContentLoaded", () => {
+      const saved = sessionStorage.getItem("walletAddress");
+      if (saved) {
+        walletAddressSpan.textContent = `${saved.slice(0, 6)}...${saved.slice(-4)}`;
+        connectBtn.classList.add("hidden");
+        walletInfo.classList.remove("hidden");
+      }
+    });
+
+    connectBtn.addEventListener("click", connectWallet);
+    disconnectBtn.addEventListener("click", disconnectWallet);
+  </script>
+</body>
+
+</html>

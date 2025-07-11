@@ -1,0 +1,224 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>Transfer Land Ownership</title>
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
+</head>
+
+<body class="flex min-h-screen bg-blue-50 text-gray-800">
+  <!-- Sidebar -->
+  <aside class="w-64 bg-teal-900 text-white p-6">
+    <h2 class="text-2xl font-bold mb-8">🏛 Titlestone</h2>
+    <ul class="space-y-4 text-lg">
+      <li><a href="index.html" class="hover:text-white">📊 Dashboard</a></li>
+      <li><a href="register.html" class="hover:text-white">📝 Register Title</a></li>
+      <li><a href="search.html" class="hover:text-white">🔍 Search Records</a></li>
+      <li><a href="transfer.html" class="text-teal-200 font-semibold">🔁 Transfer Ownership</a></li>
+      <li><a href="notarize.html" class="hover:text-white">📜 Digital Notary</a></li>
+      <li><a href="notary-records.html" class="hover:text-white">📄 Notarized Records</a></li>
+    </ul>
+
+    <!-- Wallet Connect UI -->
+    <div class="mt-10" id="wallet-section">
+      <button id="connectWalletBtn"
+        class="bg-teal-700 hover:bg-teal-600 text-white font-semibold px-4 py-2 rounded w-full">
+        🔌 Connect Wallet
+      </button>
+
+      <div id="walletInfo" class="hidden mt-4 space-y-2">
+        <div class="text-sm break-all font-mono bg-teal-800 px-3 py-2 rounded">
+          <span id="walletAddress">0x...</span>
+        </div>
+        <button id="disconnectBtn"
+          class="bg-red-600 hover:bg-red-500 text-white font-semibold px-4 py-2 rounded w-full">
+          ❌ Disconnect
+        </button>
+      </div>
+    </div>
+  </aside>
+
+  <!-- Main Content -->
+  <main class="flex-1 p-8">
+    <h1 class="text-4xl font-bold mb-6">Transfer Land Ownership</h1>
+
+    <div class="max-w-xl bg-white p-6 rounded-xl shadow-md">
+      <form id="transferForm" class="space-y-4">
+        <div>
+          <label for="landId" class="block font-medium mb-1">🏷 Land ID (e.g., T-1):</label>
+          <input type="text" id="landId" required placeholder="e.g. T-1"
+            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-300" />
+        </div>
+
+        <div>
+          <label for="newOwner" class="block font-medium mb-1">👤 New Owner Address:</label>
+          <input type="text" id="newOwner" required placeholder="0x..."
+            class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-300" />
+        </div>
+
+        <button id="submitBtn" type="submit" disabled
+          class="w-full bg-teal-600 text-white font-semibold py-2 px-4 rounded-md opacity-50 cursor-not-allowed">
+          Transfer Ownership
+        </button>
+      </form>
+
+      <p id="status" class="mt-4 text-sm text-gray-700"></p>
+    </div>
+
+    <!-- Transfer History Table -->
+    <div class="mt-12">
+      <h2 class="text-2xl font-semibold mb-4">📜 Transfer History</h2>
+      <table class="w-full table-auto border border-gray-300">
+        <thead class="bg-teal-700 text-white">
+          <tr>
+            <th class="p-2">Land ID</th>
+            <th class="p-2">From</th>
+            <th class="p-2">To</th>
+            <th class="p-2">Location</th>
+            <th class="p-2">Area (sqm)</th>
+          </tr>
+        </thead>
+        <tbody id="transferTable" class="text-sm bg-white"></tbody>
+      </table>
+    </div>
+  </main>
+
+  <script type="module">
+    import { getContract } from './contract.js';
+
+    const form = document.getElementById('transferForm');
+    const status = document.getElementById('status');
+    const submitBtn = document.getElementById('submitBtn');
+    let connected = false;
+
+    async function connectWallet() {
+      if (!window.ethereum) {
+        status.textContent = "❌ MetaMask is not installed.";
+        return;
+      }
+
+      try {
+        const provider = new ethers.BrowserProvider(window.ethereum);
+        const accounts = await provider.send("eth_requestAccounts", []);
+        const address = accounts[0];
+        const short = `${address.slice(0, 6)}...${address.slice(-4)}`;
+
+        document.getElementById('walletAddress').textContent = short;
+        document.getElementById('connectWalletBtn').classList.add('hidden');
+        document.getElementById('walletInfo').classList.remove('hidden');
+
+        sessionStorage.setItem("walletAddress", address);
+        connected = true;
+
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+        status.textContent = `✅ Wallet connected: ${short}`;
+      } catch (err) {
+        status.textContent = `❌ Wallet connection failed: ${err.message}`;
+      }
+    }
+
+    function disconnectWallet() {
+      sessionStorage.removeItem("walletAddress");
+      document.getElementById('connectWalletBtn').classList.remove('hidden');
+      document.getElementById('walletInfo').classList.add('hidden');
+      document.getElementById('walletAddress').textContent = '';
+      connected = false;
+
+      submitBtn.disabled = true;
+      submitBtn.classList.add('opacity-50', 'cursor-not-allowed');
+      status.textContent = "⚠️ Wallet disconnected.";
+    }
+
+    window.addEventListener('DOMContentLoaded', async () => {
+      const saved = sessionStorage.getItem("walletAddress");
+      if (saved) {
+        connected = true;
+        const short = `${saved.slice(0, 6)}...${saved.slice(-4)}`;
+        document.getElementById('walletAddress').textContent = short;
+        document.getElementById('connectWalletBtn').classList.add('hidden');
+        document.getElementById('walletInfo').classList.remove('hidden');
+
+        submitBtn.disabled = false;
+        submitBtn.classList.remove('opacity-50', 'cursor-not-allowed');
+      }
+
+      await loadTransfers();
+    });
+
+    document.getElementById('connectWalletBtn').addEventListener('click', connectWallet);
+    document.getElementById('disconnectBtn').addEventListener('click', disconnectWallet);
+
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault();
+
+      if (!connected) {
+        status.textContent = "❌ Connect your wallet first.";
+        return;
+      }
+
+      status.textContent = '🔌 Connecting to contract...';
+
+      try {
+        const contract = await getContract();
+        const rawLandId = document.getElementById('landId').value.trim();
+        const newOwner = document.getElementById('newOwner').value.trim();
+
+        const match = rawLandId.match(/^T-(\d+)$/i);
+        if (!match) {
+          status.textContent = "❌ Invalid Land ID format. Use format T-1, T-2, etc.";
+          return;
+        }
+
+        const landId = parseInt(match[1], 10);
+        const tx = await contract.transferOwnership(landId, newOwner);
+
+        status.textContent = '⏳ Transaction sent. Waiting for confirmation...';
+        await tx.wait();
+
+        status.innerHTML = `✅ <span class="font-semibold">Ownership transferred!</span> <br />TX: <code class="text-blue-600 break-all">${tx.hash}</code>`;
+        form.reset();
+
+        await loadTransfers(); // Refresh table
+      } catch (err) {
+        console.error(err);
+        status.innerHTML = `❌ <span class="text-red-600">Error:</span> ${err.message}`;
+      }
+    });
+
+    async function loadTransfers() {
+      try {
+        const contract = await getContract();
+        const filter = contract.filters.OwnershipTransferred();
+        const events = await contract.queryFilter(filter);
+
+        const tableBody = document.getElementById("transferTable");
+        tableBody.innerHTML = "";
+
+        for (const event of events.reverse()) {
+          const { landId, oldOwner, newOwner, location, squareMeters } = event.args;
+
+          const row = document.createElement("tr");
+          row.classList.add("border-t");
+
+          row.innerHTML = `
+            <td class="p-2 text-center">T-${landId}</td>
+            <td class="p-2 break-all text-xs">${oldOwner}</td>
+            <td class="p-2 break-all text-xs">${newOwner}</td>
+            <td class="p-2">${location}</td>
+            <td class="p-2 text-center">${squareMeters}</td>
+          `;
+
+          tableBody.appendChild(row);
+        }
+      } catch (err) {
+        console.error("Error loading transfer history:", err);
+      }
+    }
+  </script>
+</body>
+
+</html>
