@@ -281,7 +281,12 @@ window.addEventListener("DOMContentLoaded", () => {
       await loadListings();
     } catch (err) {
       console.error(err);
-      status.textContent = `❌ Error: ${err.message}`;
+      // status.textContent = `❌ Error: ${err.message}`;
+      if (err.info.error.code == 4001) {
+        status.innerHTML = `<span class="text-yellow-600">⚠️ Transaction cancelled by user.</span>`;
+      } else {
+        status.innerHTML = `<span class="text-red-600">❌ Error:</span> ${err.message}`;
+      }
     }
   });
 

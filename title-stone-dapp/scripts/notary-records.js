@@ -199,7 +199,11 @@ function attachVoteHandlers(contract) {
         location.reload(); // Refresh the page to show updated votes
       } catch (err) {
         console.error(err);
-        alert(`❌ Error: ${err.message}`);
+        if (err.info.error.code == 4001) {
+          alert("⚠️ Warning: Transaction cancelled by user.");
+        } else {
+          alert(`❌ Error: ${err.message}`);
+        }
         btn.textContent = isValid ? "✅ Valid" : "❌ Invalid";
         btn.disabled = false;
       }
