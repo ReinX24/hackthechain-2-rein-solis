@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Land Registry Dashboard</title>
+  <title>TitleStone</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
 </head>
@@ -130,7 +130,7 @@
 
   <!-- Load Land Records -->
   <script type="module">
-    import { getAllLands } from './contract.js';
+    import { getAllLands } from './scripts/contract.js';
     async function loadLands() {
       const lands = await getAllLands();
       const table = document.querySelector('#landTable');
@@ -237,6 +237,26 @@
     disconnectBtn?.addEventListener("click", disconnectWallet);
     connectBtnMobile?.addEventListener("click", connectWallet);
     disconnectBtnMobile?.addEventListener("click", disconnectWallet);
+  </script>
+
+  <script type="module">
+    // Import the functions you need from the SDKs you need
+    import { initializeApp } from "https://www.gstatic.com/firebasejs/11.10.0/firebase-app.js";
+    // TODO: Add SDKs for Firebase products that you want to use
+    // https://firebase.google.com/docs/web/setup#available-libraries
+
+    // Your web app's Firebase configuration
+    const firebaseConfig = {
+      apiKey: "AIzaSyA7cU5Pd3fRB7uDt4rB52U3CCbal9TS-NY",
+      authDomain: "title-stone-dapp.firebaseapp.com",
+      projectId: "title-stone-dapp",
+      storageBucket: "title-stone-dapp.firebasestorage.app",
+      messagingSenderId: "151246755403",
+      appId: "1:151246755403:web:8d061799797e4827215fce"
+    };
+
+    // Initialize Firebase
+    const app = initializeApp(firebaseConfig);
   </script>
 </body>
 
