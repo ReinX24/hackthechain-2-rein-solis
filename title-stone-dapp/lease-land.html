@@ -4,7 +4,7 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>🏡 Sell Land</title>
+  <title>🏘️ Lease Land</title>
   <script src="https://cdn.tailwindcss.com"></script>
   <script src="https://cdn.jsdelivr.net/npm/ethers@6.8.1/dist/ethers.umd.min.js"></script>
 </head>
@@ -24,8 +24,8 @@
     <a href="transfer.html" class="block hover:text-white">🔁 Transfer Ownership</a>
     <a href="notarize.html" class="block hover:text-white">📜 Digital Notary</a>
     <a href="notary-records.html" class="block hover:text-white">📄 Notarized Records</a>
-    <a href="sell-land.html" class="block text-teal-200 font-semibold">🏠 Sell Land</a>
-    <a href="lease-land.html" class="block hover:text-white">🏘️ Lease Land</a>
+    <a href="sell-land.html" class="block hover:text-white ">🏠 Sell Land</a>
+    <a href="lease-land.html" class="block text-teal-200 font-semibold">🏘️ Lease Land</a>
 
     <!-- Wallet Info Mobile -->
     <div id="wallet-section-mobile" class="mt-4">
@@ -58,8 +58,8 @@
         <li><a href="transfer.html" class="hover:text-white">🔁 Transfer Ownership</a></li>
         <li><a href="notarize.html" class="hover:text-white">📜 Digital Notary</a></li>
         <li><a href="notary-records.html" class="hover:text-white">📄 Notarized Records</a></li>
-        <li><a href="sell-land.html" class="text-teal-200 font-semibold">🏠 Sell Land</a></li>
-        <li><a href="lease-land.html" class="hover:text-white">🏘️ Lease Land</a></li>
+        <li><a href="sell-land.html" class="hover:text-white">🏠 Sell Land</a></li>
+        <li><a href="lease-land.html" class="text-teal-200 font-semibold">🏘️ Lease Land</a></li>
       </ul>
 
       <!-- Wallet Info Desktop -->
@@ -79,44 +79,30 @@
         </div>
       </div>
     </aside>
-
     <!-- Main -->
     <main class="flex-1 p-4 sm:p-6 md:p-8">
-      <h1 class="text-3xl sm:text-4xl font-bold mb-6">🏡 List Land for Sale</h1>
+      <h1 class="text-3xl sm:text-4xl font-bold mb-6">🏘️ List Land for Lease</h1>
 
       <div class="max-w-xl bg-white p-4 sm:p-6 rounded-xl shadow-md mb-12">
-        <form id="sellForm" class="space-y-4">
-          <div>
-            <label for="landId" class="block font-medium mb-1">Land ID (e.g., T-1):</label>
-            <input type="text" id="landId" required placeholder="T-1"
-              class="w-full px-4 py-2 border rounded-md focus:ring-2 focus:ring-blue-300" />
-          </div>
-          <div>
-            <label for="ownerName" class="block font-medium mb-1">Owner Name:</label>
-            <input type="text" id="ownerName" required class="w-full px-4 py-2 border rounded-md" />
-          </div>
-          <div>
-            <label for="location" class="block font-medium mb-1">Location:</label>
-            <input type="text" id="location" required class="w-full px-4 py-2 border rounded-md" />
-          </div>
-          <div>
-            <label for="area" class="block font-medium mb-1">Square Feet:</label>
-            <input type="number" id="area" required class="w-full px-4 py-2 border rounded-md" />
-          </div>
-          <div>
-            <label for="price" class="block font-medium mb-1">Price (in Viction):</label>
-            <input type="number" step="0.0001" id="price" required class="w-full px-4 py-2 border rounded-md" />
-          </div>
-          <button type="submit"
-            class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 px-4 rounded-md">
-            ➕ List Land
-          </button>
+        <form id="leaseForm" class="space-y-4">
+          <input type="text" id="landId" placeholder="T-1" required class="w-full px-4 py-2 border rounded-md" />
+          <input type="text" id="ownerName" placeholder="Owner Name" required
+            class="w-full px-4 py-2 border rounded-md" />
+          <input type="text" id="location" placeholder="Location" required class="w-full px-4 py-2 border rounded-md" />
+          <input type="number" id="area" placeholder="Square Feet" required
+            class="w-full px-4 py-2 border rounded-md" />
+          <input type="number" step="0.0001" id="price" placeholder="Monthly Rate in VIC" required
+            class="w-full px-4 py-2 border rounded-md" />
+          <input type="number" id="duration" placeholder="Duration (Months)" required
+            class="w-full px-4 py-2 border rounded-md" />
+          <button type="submit" class="w-full bg-teal-600 hover:bg-teal-700 text-white font-semibold py-2 rounded-md">➕
+            List for Lease</button>
         </form>
         <p id="status" class="mt-4 text-sm text-gray-700"></p>
       </div>
 
       <div class="bg-white p-4 sm:p-6 rounded-xl shadow-md overflow-x-auto">
-        <h2 class="text-2xl font-semibold mb-4">📋 Lands for Sale</h2>
+        <h2 class="text-2xl font-semibold mb-4">📋 Lands for Lease</h2>
         <table class="min-w-full text-sm table-auto border border-gray-300">
           <thead class="bg-teal-700 text-white">
             <tr>
@@ -124,19 +110,20 @@
               <th class="p-2 text-left">Owner</th>
               <th class="p-2 text-left">Location</th>
               <th class="p-2 text-left">Area</th>
-              <th class="p-2 text-left">Price (VIC)</th>
-              <th class="p-2 text-left">Seller Wallet</th>
+              <th class="p-2 text-left">Rate (VIC)</th>
+              <th class="p-2 text-left">Duration</th>
+              <th class="p-2 text-left">Wallet</th>
               <th class="p-2 text-left">Available</th>
               <th class="p-2 text-left">Action</th>
             </tr>
           </thead>
-          <tbody id="landTable" class="bg-white text-gray-800"></tbody>
+          <tbody id="leaseTable" class="bg-white text-gray-800"></tbody>
         </table>
       </div>
     </main>
   </div>
 
-  <script type="module" src="./sell-land.js"></script>
+  <script type="module" src="./lease-land.js"></script>
 
   <!-- Unified Wallet Connect Logic -->
   <script type="module">
