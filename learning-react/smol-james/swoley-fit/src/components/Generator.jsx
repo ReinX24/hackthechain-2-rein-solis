@@ -1,6 +1,7 @@
 import { SectionWrapper } from "./SectionWrapper";
 import { SCHEMES, WORKOUTS } from "../utils/swoldier";
 import { useState } from "react";
+import { Button } from "./Button";
 
 const Header = (props) => {
   const { index, title, description } = props;
@@ -22,10 +23,37 @@ export default function Generator() {
   const [showModal, setShowModal] = useState(false);
   const [poison, setPoison] = useState("individual");
   const [muscles, setMuscles] = useState([]);
-  const [goals, setGoals] = useState("strength_power");
+  const [goal, setGoal] = useState("strength_power");
 
   const toggleModal = () => {
     setShowModal(!showModal);
+  };
+
+  const updateMuscles = (muscleGroup) => {
+    // Removing muscle group if we click on it again (individual)
+    if (muscles.includes(muscleGroup)) {
+      setMuscles(muscles.filter((val) => val !== muscleGroup));
+      return;
+    }
+
+    // If there are more than 2 muscles (for individual), do not add more
+    if (muscles.length > 2) {
+      return;
+    }
+
+    // If the chosen poison is not individual, set into an array
+    if (poison !== "individual") {
+      setMuscles([muscleGroup]);
+      setShowModal(false);
+      return;
+    }
+
+    // Set the muscles array, runs for individual category
+    setMuscles([...muscles, muscleGroup]);
+
+    if (muscles.length === 2) {
+      setShowModal(false);
+    }
   };
 
   return (
@@ -43,11 +71,13 @@ export default function Generator() {
           return (
             <button
               onClick={() => {
+                // Whenever a poison is picked, reset muscles and change poison type
+                setMuscles([]);
                 setPoison(type);
               }}
               className={
-                "bg-slate-950 border border-blue-400 py-3 duration-200 hover:border-blue-600 rounded-lg" +
-                (type === poison ? "" : "")
+                "bg-slate-950 border border-blue-400 py-3 duration-200 px-4 hover:border-blue-600 rounded-lg " +
+                (type === poison ? "border-blue-600" : "border-blue-400")
               }
               key={typeIndex}
             >
@@ -67,11 +97,39 @@ export default function Generator() {
           onClick={toggleModal}
           className="relative p-3 flex items-center justify-center"
         >
-          <p>Select muscles groups</p>
+          <p className="capitalize">
+            {muscles.length === 0 ? "Select muscles groups" : muscles.join(" ")}
+          </p>
           <i className="fa-solid absolute right-3 top-1/2 -translate-y-1/2 fa-caret-down"></i>
         </button>
 
-        {showModal && <div>modal</div>}
+        {showModal && (
+          <div className="flex flex-col px-3 pb-3">
+            {/* The individual array only contains values whereas the other
+            categories have a key and another array for their values */}
+            {(poison === "individual"
+              ? WORKOUTS[poison]
+              : Object.keys(WORKOUTS[poison])
+            ).map((muscleGroup, muscleGroupIndex) => {
+              return (
+                <button
+                  key={muscleGroupIndex}
+                  className={
+                    "hover:text-blue-400 duration-200 " +
+                    (muscles.includes(muscleGroup) ? "text-blue-400" : " ")
+                  }
+                  onClick={() => {
+                    updateMuscles(muscleGroup);
+                  }}
+                >
+                  <p className="uppercase">
+                    {muscleGroup.replaceAll("_", " ")}
+                  </p>
+                </button>
+              );
+            })}
+          </div>
+        )}
       </div>
 
       <Header
@@ -83,7 +141,13 @@ export default function Generator() {
         {Object.keys(SCHEMES).map((scheme, schemeIndex) => {
           return (
             <button
-              className="bg-slate-950 border border-blue-400 py-3 duration-200 hover:border-blue-600 rounded-lg"
+              onClick={() => {
+                setGoal(scheme);
+              }}
+              className={
+                "bg-slate-950 border border-blue-400 py-3 duration-200 hover:border-blue-600 rounded-lg px-4 " +
+                (scheme === goal ? "border-blue-600" : "border-blue-400")
+              }
               key={schemeIndex}
             >
               <p className="capitalize">{scheme.replaceAll("_", " ")}</p>
@@ -91,6 +155,8 @@ export default function Generator() {
           );
         })}
       </div>
+
+      <Button text={"Formulate"} />
     </SectionWrapper>
   );
 }
