@@ -4,7 +4,17 @@ import { useState } from "react";
 import { Button } from "./Button";
 
 const Header = (props) => {
-  const { index, title, description } = props;
+  const {
+    index,
+    title,
+    description,
+    poison,
+    setPoison,
+    muscles,
+    setMuscles,
+    goal,
+    setGoal,
+  } = props;
 
   return (
     <div className="flex flex-col gap-4">
@@ -19,11 +29,18 @@ const Header = (props) => {
   );
 };
 
-export default function Generator() {
+export default function Generator(props) {
   const [showModal, setShowModal] = useState(false);
-  const [poison, setPoison] = useState("individual");
-  const [muscles, setMuscles] = useState([]);
-  const [goal, setGoal] = useState("strength_power");
+
+  const {
+    poison,
+    setPoison,
+    muscles,
+    setMuscles,
+    goal,
+    setGoal,
+    updateWorkout,
+  } = props;
 
   const toggleModal = () => {
     setShowModal(!showModal);
@@ -58,6 +75,7 @@ export default function Generator() {
 
   return (
     <SectionWrapper
+      id={"generate"}
       header={"generate your workout"}
       title={["It's", "Huge", "o'clock"]}
     >
@@ -137,7 +155,8 @@ export default function Generator() {
         title={"Become a Juggernaut"}
         description={"Select your ultimate objective."}
       />
-      <div className="grid grid-cols-3 gap-4">
+      {/* If it goes past the small screen breakpoint, change to grid-cols-3 */}
+      <div className="grid grid-cols-1 sm:grid-cols-3 gap-4">
         {Object.keys(SCHEMES).map((scheme, schemeIndex) => {
           return (
             <button
@@ -156,7 +175,7 @@ export default function Generator() {
         })}
       </div>
 
-      <Button text={"Formulate"} />
+      <Button func={updateWorkout} text={"Formulate"} />
     </SectionWrapper>
   );
 }
