@@ -1,11 +1,17 @@
-import { useState, useEffect } from "react";
+import { useRef, useState, useEffect } from "react";
+import FileDisplay from "./components/FileDisplay";
 import Header from "./components/Header";
 import HomePage from "./components/HomePage";
-import FileDisplay from "./components/FileDisplay";
+import Information from "./components/Information";
+import Transcribing from "./components/Transcribing";
 
 function App() {
   const [file, setFile] = useState(null);
   const [audioStream, setAudioStream] = useState(null);
+  const [output, setOutput] = useState(null);
+  const [downloading, setDownloading] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [finished, setFinished] = useState(false);
 
   const isAudioAvailable = file || audioStream;
 
@@ -14,9 +20,35 @@ function App() {
     setAudioStream(null);
   };
 
+  const worker = useRef(null);
+
   useEffect(() => {
-    console.log(audioStream);
-  }, [audioStream]);
+    if (!worker.current) {
+      worker.current = new Worker(
+        new URL("./utils/whisper.worker.js", import.meta.url),
+        {
+          type: "module",
+        }
+      );
+    }
+
+    const onMessageReceived = async (e) => {
+      switch (e.data.type) {
+        case "DOWNLOADING":
+          console.log("DOWNLOADING");
+          break;
+        case "LOADING":
+          console.log("DOWNLOADING");
+          break;
+        case "RESULT":
+          console.log("DOWNLOADING");
+          break;
+        case "INFERENCE_DONE":
+          console.log("DOWNLOADING");
+          break;
+      }
+    };
+  }, []);
 
   return (
     <div className="bg-gradient-to-r from-blue-50 to-transparent text-slate-700 text-sm sm:text-base">
@@ -24,7 +56,11 @@ function App() {
         {/* Main Section */}
         <section className="min-h-screen flex flex-col">
           <Header />
-          {isAudioAvailable ? (
+          {output ? (
+            <Information />
+          ) : loading ? (
+            <Transcribing />
+          ) : isAudioAvailable ? (
             <FileDisplay
               handleAudioReset={handleAudioReset}
               file={file}
